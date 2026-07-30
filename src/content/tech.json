@@ -10,16 +10,6 @@
     "url": "https://www.typescriptlang.org"
   },
   {
-    "id": "astro",
-    "name": "Astro",
-    "icon": "simple-icons:astro",
-    "category": "frontend",
-    "level": "nucleo",
-    "since": 2022,
-    "note": "Cero JavaScript por defecto. Islas solo donde hacen falta.",
-    "url": "https://astro.build"
-  },
-  {
     "id": "react",
     "name": "React",
     "icon": "simple-icons:react",
@@ -50,6 +40,26 @@
     "url": "https://tailwindcss.com"
   },
   {
+    "id": "golang",
+    "name": "Go",
+    "icon": "simple-icons:go",
+    "category": "backend",
+    "level": "nucleo",
+    "since": 2024,
+    "note": "Lenguaje de programación concurrente y de bajo nivel.",
+    "url": "https://golang.org"
+  },
+  {
+    "id": "nest",
+    "name": "NestJS",
+    "icon": "simple-icons:nestjs",
+    "category": "backend",
+    "level": "nucleo",
+    "since": 2018,
+    "note": "Framework de Node.js para construir aplicaciones escalables.",
+    "url": "https://nestjs.com"
+  },
+  {
     "id": "nodejs",
     "name": "Node.js",
     "icon": "simple-icons:nodedotjs",
@@ -60,22 +70,14 @@
     "url": "https://nodejs.org"
   },
   {
-    "id": "fastify",
-    "name": "Fastify",
-    "icon": "simple-icons:fastify",
+    "id": "express",
+    "name": "Express",
+    "icon": "simple-icons:express",
     "category": "backend",
     "level": "solido",
-    "since": 2021,
-    "note": "Esquemas JSON como fuente de verdad de la validación y los tipos."
-  },
-  {
-    "id": "graphql",
-    "name": "GraphQL",
-    "icon": "simple-icons:graphql",
-    "category": "backend",
-    "level": "en-uso",
-    "since": 2021,
-    "note": "Útil cuando el cliente manda; peligroso sin límites de coste."
+    "since": 2018,
+    "note": "Rutas, middlewares y controladores para APIs REST.",
+    "url": "https://expressjs.com"
   },
   {
     "id": "postgresql",
@@ -83,27 +85,29 @@
     "icon": "simple-icons:postgresql",
     "category": "datos",
     "level": "nucleo",
-    "since": 2019,
+    "since": 2022,
     "note": "Índices, planes de consulta y transacciones antes que caché.",
     "url": "https://www.postgresql.org"
   },
   {
-    "id": "prisma",
-    "name": "Prisma",
-    "icon": "simple-icons:prisma",
+    "id": "mongodb",
+    "name": "MongoDB",
+    "icon": "simple-icons:mongodb",
     "category": "datos",
-    "level": "solido",
-    "since": 2021,
-    "note": "Migraciones versionadas y acceso a datos con tipos reales."
+    "level": "nucleo",
+    "since": 2022,
+    "note": "Documentos flexibles y consultas poderosas sin esquemas fijos.",
+    "url": "https://www.mongodb.com"
   },
   {
-    "id": "redis",
-    "name": "Redis",
-    "icon": "simple-icons:redis",
+    "id": "mysql",
+    "name": "MySQL",
+    "icon": "simple-icons:mysql",
     "category": "datos",
-    "level": "en-uso",
-    "since": 2022,
-    "note": "Caché con invalidación explícita y colas ligeras."
+    "level": "nucleo",
+    "since": 2019,
+    "note": "Índices, planes de consulta y transacciones antes que caché.",
+    "url": "https://www.mysql.com"
   },
   {
     "id": "docker",
@@ -115,42 +119,6 @@
     "note": "Builds multi-etapa y paridad real entre local y producción."
   },
   {
-    "id": "aws",
-    "name": "AWS",
-    "icon": "simple-icons:amazonwebservices",
-    "category": "infra",
-    "level": "en-uso",
-    "since": 2021,
-    "note": "S3, CloudFront, Lambda y lo justo de IAM para dormir tranquilo."
-  },
-  {
-    "id": "github-actions",
-    "name": "GitHub Actions",
-    "icon": "simple-icons:githubactions",
-    "category": "infra",
-    "level": "solido",
-    "since": 2020,
-    "note": "CI que bloquea el merge: tipos, tests, tamaño de bundle y a11y."
-  },
-  {
-    "id": "vitest",
-    "name": "Vitest",
-    "icon": "simple-icons:vitest",
-    "category": "calidad",
-    "level": "solido",
-    "since": 2022,
-    "note": "Tests unitarios rápidos, ejecutados en watch mientras escribo."
-  },
-  {
-    "id": "playwright",
-    "name": "Playwright",
-    "icon": "simple-icons:playwright",
-    "category": "calidad",
-    "level": "solido",
-    "since": 2022,
-    "note": "E2E en tres navegadores y capturas para revisar regresiones."
-  },
-  {
     "id": "figma",
     "name": "Figma",
     "icon": "simple-icons:figma",
@@ -158,14 +126,5 @@
     "level": "en-uso",
     "since": 2019,
     "note": "Donde acordamos los tokens antes de escribir una línea de CSS."
-  },
-  {
-    "id": "storybook",
-    "name": "Storybook",
-    "icon": "simple-icons:storybook",
-    "category": "diseno",
-    "level": "en-uso",
-    "since": 2021,
-    "note": "El catálogo vivo del sistema de diseño y su documentación."
   }
 ]

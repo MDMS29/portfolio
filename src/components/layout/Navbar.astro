@@ -19,7 +19,7 @@ import ThemeToggle from './ThemeToggle.astro';
 import SocialLinks from '@components/ui/SocialLinks.astro';
 
 const isHome = Astro.url.pathname === '/';
-const anchor = (id: string): string => (isHome ? `#${id}` : `/#${id}`);
+const anchor = (id: string): string => (isHome ? `#${id}` : `#${id}`);
 const initials = SITE.author.name
   .split(' ')
   .map((word) => word[0])
@@ -28,7 +28,7 @@ const initials = SITE.author.name
 
 <header class="header" data-site-header>
   <div class="stage-container header__inner">
-    <a class="brand" href="/" aria-label={`${SITE.author.name} — volver al inicio`}>
+    <a class="brand" href="" aria-label={`${SITE.author.name} — volver al inicio`}>
       <span class="brand__mark" aria-hidden="true">{initials}</span>
       <span class="brand__text">
         <span class="brand__name">{SITE.author.name}</span>
