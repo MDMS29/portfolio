@@ -1,0 +1,236 @@
+---
+/**
+ * ============================================================================
+ * BaseLayout — la sala. Todo lo que se representa ocurre dentro.
+ * ============================================================================
+ * Responsabilidades, y solo estas:
+ *   · <head> completo: SEO, Open Graph, datos estructurados, fuentes.
+ *   · Aplicacion del tema ANTES del primer pintado.
+ *   · Andamiaje de accesibilidad: skip link, landmarks, region de anuncios.
+ *   · Telon de fondo (decorativo) separado del contenido (semantico).
+ *   · Arranque del runtime de animacion, una sola vez por navegacion.
+ *
+ * Lo que NO hace: saber nada del contenido. Las paginas le pasan metadatos.
+ */
+import { ClientRouter } from 'astro:transitions';
+
+import '@styles/global.css';
+import '@fontsource-variable/inter';
+import '@fontsource-variable/playfair-display';
+
+// Precarga del subconjunto latino: el navegador lo pide en paralelo al CSS
+// en lugar de esperar a descubrirlo dentro de la hoja de estilos. Es la
+// diferencia entre un LCP con texto ya tipografiado y uno con FOUT visible.
+import interLatin from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+import playfairLatin from '@fontsource-variable/playfair-display/files/playfair-display-latin-wght-normal.woff2?url';
+
+import { SITE } from '@data/site';
+import { theater, theaterCssVars } from '@data/theater.config';
+import { buildSeo, jsonLdGraph, personSchema, websiteSchema } from '@utils/seo';
+
+import AnimatedBackground from '@components/theater/AnimatedBackground.astro';
+import Spotlight from '@components/theater/Spotlight.astro';
+import Curtain from '@components/theater/Curtain.astro';
+import ProgressRail from '@components/theater/ProgressRail.astro';
+import Navbar from '@components/layout/Navbar.astro';
+import Footer from '@components/layout/Footer.astro';
+import SkipLink from '@components/layout/SkipLink.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  type?: 'website' | 'article';
+  noindex?: boolean;
+  /** El telon solo se levanta en la portada. */
+  curtain?: boolean;
+  /** Nodos JSON-LD adicionales de la pagina. */
+  jsonLd?: Record<string, unknown>[];
+}
+
+const {
+  title,
+  description,
+  image,
+  type = 'website',
+  noindex = false,
+  curtain = false,
+  jsonLd = [],
+} = Astro.props;
+
+const seo = buildSeo({ title, description, image, type, path: Astro.url.pathname, noindex });
+const structuredData = jsonLdGraph(personSchema(), websiteSchema(), ...jsonLd);
+---
+
+<!doctype html>
+<html lang={SITE.lang} style={theaterCssVars()}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!--
+      Tema y movimiento, resueltos antes del primer pintado.
+      Es el unico script bloqueante de la pagina y esta justificado: cualquier
+      alternativa asincrona provoca un destello blanco en modo oscuro.
+    -->
+    <script is:inline define:vars={{ curtainOnce: theater.curtain.oncePerSession }}>
+      (() => {
+        const root = document.documentElement;
+        try {
+          const stored = localStorage.getItem('teatro:tema');
+          const dark = stored
+            ? stored === 'dark'
+            : matchMedia('(prefers-color-scheme: dark)').matches;
+          root.classList.toggle('dark', dark);
+        } catch {
+          root.classList.toggle('dark', matchMedia('(prefers-color-scheme: dark)').matches);
+        }
+
+        // El interruptor maestro de la animacion: hay JS y no se pidio
+        // reducir el movimiento. El CSS solo oculta contenido si vale "on".
+        if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          root.dataset.motion = 'on';
+        }
+
+        // El telon, solo en la primera visita de la sesion.
+        try {
+          if (curtainOnce && sessionStorage.getItem('teatro:telon')) {
+            root.dataset.curtain = 'skip';
+          } else {
+            sessionStorage.setItem('teatro:telon', '1');
+          }
+        } catch {
+          /* sin sessionStorage el telon se abre siempre: no es grave */
+        }
+      })();
+    </script>
+
+    <title>{seo.title}</title>
+    <meta name="description" content={seo.description} />
+    <meta name="robots" content={seo.robots} />
+    <link rel="canonical" href={seo.canonical} />
+    <meta name="author" content={SITE.author.name} />
+    <meta name="keywords" content={SITE.keywords.join(', ')} />
+
+    <meta name="theme-color" content={SITE.themeColor.light} media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content={SITE.themeColor.dark} media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
+
+    <meta property="og:type" content={seo.type} />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:locale" content={SITE.locale} />
+    <meta property="og:title" content={seo.title} />
+    <meta property="og:description" content={seo.description} />
+    <meta property="og:url" content={seo.canonical} />
+    <meta property="og:image" content={seo.image} />
+    <meta property="og:image:alt" content={`Cartel del portfolio de ${SITE.author.name}`} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={seo.title} />
+    <meta name="twitter:description" content={seo.description} />
+    <meta name="twitter:image" content={seo.image} />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={playfairLatin} as="font" type="font/woff2" crossorigin />
+
+    <script type="application/ld+json" is:inline set:html={structuredData} />
+
+    <!--
+      View Transitions solo tienen sentido entre paginas: la navegacion a un
+      caso de estudio se representa como un cambio de escena, sin recargar
+      el telon de fondo ni volver a descargar las fuentes.
+    -->
+    <ClientRouter />
+  </head>
+
+  <body>
+    <SkipLink />
+
+    <!-- Centinela de 1px: sustituye a un listener de scroll para el header. -->
+    <div data-scroll-sentinel aria-hidden="true"></div>
+
+    <ProgressRail />
+    {curtain && <Curtain title={SITE.name} />}
+
+    <!--
+      TELON DE FONDO. Fijo, decorativo, aislado en su propia capa de
+      composicion y por DEBAJO de todo el contenido: ninguna de sus luces
+      puede degradar el contraste de un solo caracter de texto.
+    -->
+    <div class="backdrop-layer" aria-hidden="true">
+      <AnimatedBackground />
+      <Spotlight />
+    </div>
+
+    <div class="scene-layer">
+      <Navbar />
+      <main id="escenario" tabindex="-1">
+        <slot />
+      </main>
+      <Footer />
+    </div>
+
+    {theater.ambience.grain && <div class="film-grain" aria-hidden="true"></div>}
+
+    <script>
+      import { initTheater, destroyTheater } from '@utils/motion';
+
+      initTheater();
+
+      // Con ClientRouter el DOM se reemplaza: hay que soltar los observers
+      // viejos y volver a montarlos sobre los nodos nuevos.
+      document.addEventListener('astro:before-swap', destroyTheater);
+      document.addEventListener('astro:after-swap', initTheater);
+    </script>
+
+    <!--
+      El tema se reaplica tras el intercambio de DOM. Va inline y aparte
+      porque debe ejecutarse antes de que el navegador pinte la pagina nueva.
+    -->
+    <script is:inline>
+      document.addEventListener('astro:after-swap', () => {
+        try {
+          const stored = localStorage.getItem('teatro:tema');
+          const dark = stored
+            ? stored === 'dark'
+            : matchMedia('(prefers-color-scheme: dark)').matches;
+          document.documentElement.classList.toggle('dark', dark);
+        } catch {
+          /* el tema por defecto ya esta aplicado */
+        }
+      });
+    </script>
+  </body>
+</html>
+
+<style>
+  .backdrop-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    /* Aisla el repintado del fondo del resto del arbol. */
+    contain: strict;
+  }
+
+  .scene-layer {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    min-height: 100dvh;
+    flex-direction: column;
+  }
+
+  main {
+    flex: 1;
+  }
+
+  /* El destino del skip link no debe mostrar contorno al recibir foco
+     programatico: no es un control, solo un punto de aterrizaje. */
+  main:focus {
+    outline: none;
+  }
+</style>

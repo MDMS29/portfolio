@@ -1,0 +1,177 @@
+/* ============================================================================
+   TEATRO — comportamiento visual compartido.
+   ----------------------------------------------------------------------------
+   Aqui SOLO vive lo que es global por necesidad:
+   1. los estados de revelado, porque los aplica el runtime via data-attributes;
+   2. los keyframes reutilizados por varios componentes.
+   Todo lo demas (telon, foco, escenario...) va en el <style> scoped de su
+   propio componente, para que borrar el componente borre su CSS.
+
+   Este archivo se importa dentro de `layer(components)`, por debajo de las
+   utilidades de Tailwind: una clase `opacity-100` siempre puede ganar.
+   ========================================================================= */
+
+/* ----------------------------------------------------------------------------
+   REVELADO PROGRESIVO
+   Contrato de accesibilidad y resiliencia:
+   el contenido SOLO se oculta si <html data-motion="on">, atributo que pone
+   el script inline del <head> unicamente cuando hay JS Y el usuario no ha
+   pedido reduccion de movimiento. Sin JS o con reduced-motion, todo nace
+   visible: la animacion es una mejora progresiva, nunca un requisito.
+   -------------------------------------------------------------------------- */
+html[data-motion='on'] [data-reveal] {
+  opacity: 0;
+  transition:
+    opacity var(--reveal-duration) var(--ease-scene),
+    transform var(--reveal-duration) var(--ease-scene),
+    filter var(--reveal-duration) var(--ease-scene);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+/* Cada variante entra "desde" un lugar distinto del escenario. */
+html[data-motion='on'] [data-reveal='rise'] {
+  transform: translate3d(0, var(--reveal-distance), 0);
+}
+html[data-motion='on'] [data-reveal='fall'] {
+  transform: translate3d(0, calc(var(--reveal-distance) * -0.7), 0);
+}
+html[data-motion='on'] [data-reveal='left'] {
+  transform: translate3d(calc(var(--reveal-distance) * -1.4), 0, 0);
+}
+html[data-motion='on'] [data-reveal='right'] {
+  transform: translate3d(calc(var(--reveal-distance) * 1.4), 0, 0);
+}
+html[data-motion='on'] [data-reveal='fade'] {
+  transform: none;
+}
+/* "Focus": el elemento entra como si el reflector lo enfocara. */
+html[data-motion='on'] [data-reveal='focus'] {
+  transform: scale(0.965);
+  filter: blur(6px);
+}
+/*
+  "Unveil": el texto se descubre de abajo arriba, como al levantar el telon.
+
+  Se implementa con MASCARA y no con `clip-path`, y la razon merece quedar
+  escrita porque es una trampa sutil:
+
+    `clip-path: inset(0 0 100% 0)` deja el elemento con area visible CERO.
+    IntersectionObserver calcula la interseccion sobre la geometria recortada,
+    asi que un elemento asi nunca "entra en pantalla" -> nunca recibe
+    `.is-revealed` -> nunca se descubre. Un bloqueo circular: el efecto de
+    entrada impide que se dispare su propia entrada.
+
+  Una mascara es un efecto de PINTADO, no un recorte de geometria: el
+  observador sigue viendo el elemento y el barrido funciona.
+*/
+html[data-motion='on'] [data-reveal='unveil'] {
+  -webkit-mask-image: linear-gradient(#000, #000);
+  mask-image: linear-gradient(#000, #000);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: 0 100%;
+  mask-position: 0 100%;
+  -webkit-mask-size: 100% 0%;
+  mask-size: 100% 0%;
+  transform: translate3d(0, calc(var(--reveal-distance) * 0.5), 0);
+  transition-property: opacity, transform, -webkit-mask-size, mask-size;
+}
+
+html[data-motion='on'] [data-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+html[data-motion='on'] [data-reveal='unveil'].is-revealed {
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+
+/* ----------------------------------------------------------------------------
+   KEYFRAMES COMPARTIDOS
+   -------------------------------------------------------------------------- */
+@keyframes theater-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  42% {
+    opacity: 0.86;
+  }
+  46% {
+    opacity: 1;
+  }
+  71% {
+    opacity: 0.92;
+  }
+}
+
+@keyframes theater-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, -34px, 0);
+  }
+}
+
+@keyframes theater-sweep {
+  from {
+    transform: translate3d(-120%, 0, 0) skewX(-18deg);
+  }
+  to {
+    transform: translate3d(320%, 0, 0) skewX(-18deg);
+  }
+}
+
+@keyframes theater-pulse-ring {
+  0% {
+    opacity: 0.7;
+    transform: scale(0.9);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(1.7);
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   GRANO DE PELICULA
+   Textura sutil sobre toda la escena. `pointer-events:none` y aria oculto:
+   decorativo puro. Se pinta con un SVG inline en data-uri (0 peticiones).
+   -------------------------------------------------------------------------- */
+.film-grain {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ----------------------------------------------------------------------------
+   RESPETO ABSOLUTO POR prefers-reduced-motion
+   Red de seguridad del sistema: aunque un componente olvide comprobarlo,
+   aqui se neutraliza cualquier animacion o transicion.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+  }
+}

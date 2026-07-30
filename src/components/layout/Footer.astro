@@ -1,0 +1,266 @@
+---
+/**
+ * PIE — el telon final y los creditos.
+ *
+ * El ano se calcula en build. En un sitio estatico eso significa que se
+ * actualiza en cada despliegue, que es exactamente lo correcto: nadie deberia
+ * enviar JavaScript al navegador solo para pintar "2026".
+ */
+import { Icon } from 'astro-icon/components';
+import { SITE } from '@data/site';
+import { NAV_ACTS } from '@data/navigation';
+import SocialLinks from '@components/ui/SocialLinks.astro';
+
+const year = new Date().getFullYear();
+const isHome = Astro.url.pathname === '/';
+const anchor = (id: string): string => (isHome ? `#${id}` : `/#${id}`);
+---
+
+<footer class="footer">
+  <div class="stage-container">
+    <div class="footer__top">
+      <div class="footer__brand">
+        <p class="footer__curtain-call">Fin de la función</p>
+        <p class="footer__name">{SITE.author.name}</p>
+        <p class="footer__tagline">{SITE.author.tagline}</p>
+        <SocialLinks primaryOnly class="footer__socials" label="Perfiles" />
+      </div>
+
+      <nav class="footer__nav" aria-label="Actos de la obra (pie de pagina)">
+        <h2 class="footer__heading">Programa</h2>
+        <ul class="footer__list">
+          {
+            NAV_ACTS.map((act) => (
+              <li>
+                <a class="footer__link" href={anchor(act.id)}>
+                  <span class="footer__link-act">{act.act}</span>
+                  {act.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="footer__contact">
+        <h2 class="footer__heading">Camerino</h2>
+        <p class="footer__line">
+          <Icon name="lucide:map-pin" aria-hidden="true" />
+          {SITE.author.location}
+        </p>
+        <p class="footer__line">
+          <Icon name="lucide:mail" aria-hidden="true" />
+          <a href={`mailto:${SITE.author.email}`}>{SITE.author.email}</a>
+        </p>
+        {
+          SITE.author.availableForWork && (
+            <p class="footer__status">
+              <span class="footer__pulse" aria-hidden="true"></span>
+              Disponible para nuevos proyectos
+            </p>
+          )
+        }
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <p class="footer__colophon">
+        &copy; {year} {SITE.author.name}. Escrito a mano con Astro, TypeScript y algo de
+        terciopelo.
+      </p>
+      <a class="footer__top-link" href={anchor('apertura')}>
+        <Icon name="lucide:arrow-up" aria-hidden="true" />
+        Volver al principio
+      </a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    position: relative;
+    margin-top: clamp(4rem, 8vw, 7rem);
+    border-top: 1px solid var(--border);
+    background: color-mix(in oklab, var(--surface-sunken) 65%, transparent);
+    padding-block: clamp(2.5rem, 6vw, 4rem) 2rem;
+  }
+
+  /* Candilejas: una linea de luz calida en el borde superior del pie. */
+  .footer::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: -1px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.6;
+  }
+
+  .footer__top {
+    display: grid;
+    gap: clamp(2rem, 5vw, 3.5rem);
+  }
+
+  .footer__curtain-call {
+    margin: 0 0 0.4rem;
+    font-size: var(--text-2xs);
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .footer__name {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    color: var(--text);
+  }
+
+  .footer__tagline {
+    margin: 0.4rem 0 1.25rem;
+    max-width: 30ch;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .footer__heading {
+    margin: 0 0 0.9rem;
+    font-family: var(--font-sans);
+    font-size: var(--text-2xs);
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+  }
+
+  .footer__list {
+    display: grid;
+    gap: 0.55rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .footer__link {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color var(--dur-fast) var(--ease-soft);
+  }
+
+  .footer__link:hover {
+    color: var(--accent);
+  }
+
+  .footer__link-act {
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+    min-width: 3.6rem;
+  }
+
+  .footer__line {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0 0 0.55rem;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+
+  .footer__line :global(svg) {
+    width: 1rem;
+    height: 1rem;
+    color: var(--accent);
+    flex: none;
+  }
+
+  .footer__line a {
+    text-decoration: none;
+  }
+
+  .footer__line a:hover {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+
+  .footer__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 1rem 0 0;
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  .footer__pulse {
+    position: relative;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: #22c55e;
+    flex: none;
+  }
+
+  .footer__pulse::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: inherit;
+    animation: theater-pulse-ring 2.4s ease-out infinite;
+  }
+
+  .footer__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: clamp(2.5rem, 5vw, 3.5rem);
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .footer__colophon {
+    margin: 0;
+    font-size: var(--text-xs);
+    color: var(--text-subtle);
+  }
+
+  .footer__top-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+
+  .footer__top-link :global(svg) {
+    width: 0.95rem;
+    height: 0.95rem;
+    transition: transform var(--dur-fast) var(--ease-out-back);
+  }
+
+  .footer__top-link:hover {
+    color: var(--accent);
+  }
+
+  .footer__top-link:hover :global(svg) {
+    transform: translateY(-3px);
+  }
+
+  @media (min-width: 48rem) {
+    .footer__top {
+      grid-template-columns: 1.4fr 1fr 1fr;
+    }
+  }
+</style>

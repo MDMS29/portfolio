@@ -1,0 +1,92 @@
+---
+/**
+ * Interruptor de luces de sala.
+ *
+ * Detalle de accesibilidad: no se usa `aria-pressed`. El boton no representa
+ * un estado activado/desactivado, sino una ACCION ("encender las luces"), y
+ * su etiqueta cambia con el tema. Anunciar ambas cosas a la vez confunde.
+ */
+import { Icon } from 'astro-icon/components';
+---
+
+<button
+  type="button"
+  class="theme-toggle"
+  data-theme-toggle
+  aria-label="Cambiar entre modo claro y oscuro"
+  title="Cambiar tema"
+>
+  <span class="theme-toggle__icons" aria-hidden="true">
+    <Icon name="lucide:sun" class="theme-toggle__icon theme-toggle__icon--sun" />
+    <Icon name="lucide:moon" class="theme-toggle__icon theme-toggle__icon--moon" />
+  </span>
+</button>
+
+<script>
+  import { toggleTheme, followSystemTheme } from '@utils/theme';
+
+  // Delegacion en `document`: el listener sobrevive a los intercambios de DOM
+  // de las View Transitions sin necesidad de volver a montarlo.
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    if (!target.closest('[data-theme-toggle]')) return;
+    toggleTheme();
+  });
+
+  followSystemTheme();
+</script>
+
+<style>
+  .theme-toggle {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition:
+      color var(--dur-fast) var(--ease-soft),
+      border-color var(--dur-fast) var(--ease-soft),
+      background-color var(--dur-fast) var(--ease-soft);
+  }
+
+  .theme-toggle:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--surface-raised);
+  }
+
+  .theme-toggle__icons {
+    display: grid;
+    /* Ambos iconos ocupan la misma celda: el cambio no mueve el layout. */
+    grid-template-areas: 'icon';
+  }
+
+  .theme-toggle__icon {
+    grid-area: icon;
+    width: 1.15rem;
+    height: 1.15rem;
+    transition:
+      opacity var(--dur-base) var(--ease-scene),
+      rotate var(--dur-base) var(--ease-scene);
+  }
+
+  .theme-toggle__icon--moon {
+    opacity: 0;
+    rotate: -70deg;
+  }
+
+  :global(html.dark) .theme-toggle__icon--sun {
+    opacity: 0;
+    rotate: 70deg;
+  }
+
+  :global(html.dark) .theme-toggle__icon--moon {
+    opacity: 1;
+    rotate: 0deg;
+  }
+</style>

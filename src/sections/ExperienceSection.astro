@@ -1,0 +1,66 @@
+---
+/**
+ * ACTO III — la gira.
+ *
+ * El mapa de tecnologias se pide UNA vez y se pasa a cada parada. Resolver
+ * las referencias dentro del bucle convertiria el render en O(n·m) lecturas
+ * de coleccion sin ganar nada.
+ */
+import Section from '@components/ui/Section.astro';
+import Timeline from '@components/ui/Timeline.astro';
+import TimelineItem from '@components/ui/TimelineItem.astro';
+import TechBadge from '@components/ui/TechBadge.astro';
+import Button from '@components/ui/Button.astro';
+import { getExperience, getTechMap, resolveTech } from '@utils/collections';
+import { formatRange, formatDuration } from '@utils/format';
+import { SITE } from '@data/site';
+
+const [experience, techMap] = await Promise.all([getExperience(), getTechMap()]);
+---
+
+<Section
+  id="experiencia"
+  lead="Dónde he trabajado, qué me llevé de cada sitio y qué cambió mientras estuve allí."
+>
+  <Timeline label="Trayectoria profesional, de lo más reciente a lo más antiguo">
+    {
+      experience.map((entry) => (
+        <TimelineItem
+          title={entry.data.role}
+          organization={entry.data.company}
+          organizationUrl={entry.data.companyUrl}
+          period={formatRange(entry.data.start, entry.data.end)}
+          duration={formatDuration(entry.data.start, entry.data.end)}
+          location={entry.data.location}
+          mode={entry.data.mode}
+          summary={entry.data.summary}
+          highlights={entry.data.highlights}
+          current={entry.data.end === null}
+        >
+          {resolveTech(techMap, entry.data.stack).map((tech) => (
+            <TechBadge tech={tech} size="sm" />
+          ))}
+        </TimelineItem>
+      ))
+    }
+  </Timeline>
+
+  {
+    /* Solo si hay CV configurado: un enlace a un PDF inexistente es peor
+       que no ofrecerlo. Se activa poniendo `cvUrl` en `src/data/site.ts`. */
+    SITE.author.cvUrl && (
+      <p class="experience__cv" data-reveal="fade">
+        <Button href={SITE.author.cvUrl} variant="link" iconEnd="lucide:download">
+          Descargar el currículum completo
+        </Button>
+      </p>
+    )
+  }
+</Section>
+
+<style>
+  .experience__cv {
+    margin: clamp(2rem, 4vw, 3rem) 0 0;
+    padding-left: var(--timeline-offset, 1.75rem);
+  }
+</style>

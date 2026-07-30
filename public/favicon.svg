@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Teatro del Codigo">
+  <defs>
+    <linearGradient id="velvet" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#b52a45" />
+      <stop offset="1" stop-color="#6d1226" />
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="7" fill="#0b0a0f" />
+  <path d="M4 4h9c0 9-2.2 15.6-4.5 24H4z" fill="url(#velvet)" />
+  <path d="M28 4h-9c0 9 2.2 15.6 4.5 24H28z" fill="url(#velvet)" />
+  <circle cx="16" cy="12" r="3.1" fill="#e0b057" />
+  <path d="M16 17.5c-3.3 0-6 2.5-6 5.6V28h12v-4.9c0-3.1-2.7-5.6-6-5.6z" fill="#e0b057" opacity=".85" />
+</svg>

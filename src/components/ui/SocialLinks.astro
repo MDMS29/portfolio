@@ -1,0 +1,119 @@
+---
+/**
+ * Enlaces sociales. Reutilizable en hero, contacto y pie: cambia la variante,
+ * no el marcado.
+ *
+ * Accesibilidad: cada enlace lleva un `aria-label` que explica adonde lleva Y
+ * avisa de que se abre en otra pestana (WCAG 3.2.5). El icono es decorativo.
+ */
+import { Icon } from 'astro-icon/components';
+import { SOCIALS, PRIMARY_SOCIALS, type SocialLink } from '@data/socials';
+import { cn } from '@utils/cn';
+
+interface Props {
+  variant?: 'icons' | 'labels';
+  /** Solo los marcados como principales. */
+  primaryOnly?: boolean;
+  size?: 'sm' | 'md';
+  class?: string;
+  /** Etiqueta del grupo para lectores de pantalla. */
+  label?: string;
+}
+
+const {
+  variant = 'icons',
+  primaryOnly = false,
+  size = 'md',
+  class: className,
+  label = 'Perfiles y contacto',
+} = Astro.props;
+
+const links: SocialLink[] = primaryOnly ? PRIMARY_SOCIALS : SOCIALS;
+
+const isExternal = (href: string): boolean => href.startsWith('http');
+---
+
+<ul class={cn('socials', `socials--${variant}`, `socials--${size}`, className)} aria-label={label}>
+  {
+    links.map((link) => (
+      <li>
+        <a
+          class="socials__link"
+          href={link.href}
+          aria-label={link.a11yLabel}
+          {...(isExternal(link.href) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+        >
+          <Icon name={link.icon} class="socials__icon" aria-hidden="true" />
+          {variant === 'labels' && <span class="socials__label">{link.label}</span>}
+        </a>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .socials {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .socials__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text-muted);
+    text-decoration: none;
+    transition:
+      color var(--dur-fast) var(--ease-soft),
+      border-color var(--dur-fast) var(--ease-soft),
+      transform var(--dur-fast) var(--ease-out-back);
+  }
+
+  .socials__link:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .socials--icons .socials__link {
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .socials--labels .socials__link {
+    padding: 0.55rem 0.9rem;
+    font-size: var(--text-sm);
+    font-weight: 500;
+  }
+
+  .socials--sm .socials__link {
+    width: 2.1rem;
+    height: 2.1rem;
+  }
+
+  .socials__icon {
+    width: 1.1rem;
+    height: 1.1rem;
+    flex: none;
+  }
+
+  .socials--sm .socials__icon {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .socials__link:hover {
+      transform: none;
+    }
+  }
+</style>

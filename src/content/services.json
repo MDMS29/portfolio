@@ -1,0 +1,76 @@
+[
+  {
+    "id": "producto-web",
+    "title": "Producto web de principio a fin",
+    "icon": "lucide:layout-template",
+    "summary": "Desde la primera conversación hasta el despliegue: arquitectura, interfaz, API y la infraestructura que lo sostiene.",
+    "deliverables": [
+      "Arquitectura documentada y decisiones justificadas",
+      "Interfaz accesible y responsive",
+      "API tipada con pruebas",
+      "Despliegue automatizado y monitorización"
+    ],
+    "highlighted": true
+  },
+  {
+    "id": "design-system",
+    "title": "Sistema de diseño",
+    "icon": "lucide:component",
+    "summary": "Tokens, componentes y documentación viva para que tus equipos dejen de reconstruir el mismo botón.",
+    "deliverables": [
+      "Capa de tokens compartida entre diseño y código",
+      "Librería de componentes versionada",
+      "Catálogo documentado en Storybook",
+      "Pruebas de accesibilidad y regresión visual"
+    ],
+    "highlighted": false
+  },
+  {
+    "id": "rendimiento",
+    "title": "Auditoría de rendimiento",
+    "icon": "lucide:gauge",
+    "summary": "Diagnóstico medido, no intuiciones: qué está lento, cuánto cuesta y en qué orden conviene arreglarlo.",
+    "deliverables": [
+      "Informe de Core Web Vitals con datos de campo",
+      "Plan de mejoras priorizado por impacto y coste",
+      "Presupuesto de rendimiento integrado en CI"
+    ],
+    "highlighted": false
+  },
+  {
+    "id": "accesibilidad",
+    "title": "Accesibilidad WCAG",
+    "icon": "lucide:accessibility",
+    "summary": "Revisión manual y automática contra WCAG 2.2 AA, con las correcciones aplicadas, no solo señaladas.",
+    "deliverables": [
+      "Auditoría manual con lector de pantalla y teclado",
+      "Correcciones implementadas y verificadas",
+      "Guía interna para que el equipo no reincida"
+    ],
+    "highlighted": false
+  },
+  {
+    "id": "migracion",
+    "title": "Migración y modernización",
+    "icon": "lucide:git-branch",
+    "summary": "Sacar una base de código antigua adelante por partes, sin congelar la entrega de producto durante meses.",
+    "deliverables": [
+      "Plan de migración incremental por rutas",
+      "Convivencia de lo viejo y lo nuevo sin duplicar equipo",
+      "Métricas de avance visibles para negocio"
+    ],
+    "highlighted": false
+  },
+  {
+    "id": "mentoria",
+    "title": "Mentoría técnica",
+    "icon": "lucide:users",
+    "summary": "Acompañamiento a equipos de frontend: revisiones de código, arquitectura y criterio para decidir sin mí.",
+    "deliverables": [
+      "Sesiones periódicas de revisión y diseño técnico",
+      "Guías de estilo y de revisión adaptadas al equipo",
+      "Plan de crecimiento por persona"
+    ],
+    "highlighted": false
+  }
+]

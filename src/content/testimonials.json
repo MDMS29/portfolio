@@ -1,0 +1,56 @@
+[
+  {
+    "id": "marta-ruiz",
+    "quote": "Llegó para arreglar el rendimiento y acabó cambiando cómo tomábamos decisiones técnicas. Ahora el equipo discute con números delante, no con opiniones.",
+    "author": "Marta Ruiz",
+    "role": "VP de Ingeniería",
+    "company": "Lumen Labs",
+    "initials": "MR",
+    "relation": "responsable"
+  },
+  {
+    "id": "diego-santos",
+    "quote": "Es la persona que quieres en la revisión de código: te señala el problema real, no el estilo de las comillas. He aprendido más en seis meses con él que en dos años antes.",
+    "author": "Diego Santos",
+    "role": "Frontend Developer",
+    "company": "Cartel Studio",
+    "initials": "DS",
+    "relation": "companero"
+  },
+  {
+    "id": "elena-vidal",
+    "quote": "Entregó el proyecto en plazo y con una documentación que nos permitió mantenerlo sin él. Eso vale más que el propio código.",
+    "author": "Elena Vidal",
+    "role": "Product Owner",
+    "company": "Nova Digital",
+    "initials": "EV",
+    "relation": "cliente"
+  },
+  {
+    "id": "carlos-mena",
+    "quote": "Nuestro checkout llevaba dos años atascado. Lo reconstruyó por partes, midiendo cada cambio, y la conversión en móvil subió un 18 % sin un rediseño completo.",
+    "author": "Carlos Mena",
+    "role": "Director de Comercio Electrónico",
+    "company": "Marca de moda",
+    "initials": "CM",
+    "relation": "cliente"
+  },
+  {
+    "id": "aisha-karim",
+    "quote": "Le pedimos accesibilidad y nos dio criterio. Dejó al equipo sabiendo por qué se hacen las cosas, no solo una lista de correcciones.",
+    "author": "Aisha Karim",
+    "role": "Head of Design",
+    "company": "Lumen Labs",
+    "initials": "AK",
+    "relation": "companero"
+  },
+  {
+    "id": "tomas-leal",
+    "quote": "Trabaja con una calma poco común. Cuando algo se rompe en producción, es la primera persona a la que llamas.",
+    "author": "Tomás Leal",
+    "role": "CTO",
+    "company": "Cartel Studio",
+    "initials": "TL",
+    "relation": "responsable"
+  }
+]

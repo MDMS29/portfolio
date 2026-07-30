@@ -1,0 +1,49 @@
+---
+/**
+ * ACTO VII — la critica.
+ *
+ * Reticula de mamposteria con `columns`, no con grid. Motivo: las citas
+ * tienen longitudes muy distintas y `columns` las encaja sin huecos ni JS
+ * midiendo alturas. El precio es que el orden de lectura visual baja por
+ * columnas; como cada testimonio es independiente, no hay perdida de sentido.
+ */
+import Section from '@components/ui/Section.astro';
+import TestimonialCard from '@components/cards/TestimonialCard.astro';
+import { getTestimonials } from '@utils/collections';
+
+const testimonials = await getTestimonials();
+---
+
+<Section
+  id="testimonios"
+  lead="Lo que dicen quienes han trabajado conmigo. Sin editar y con nombre y apellidos."
+>
+  <div class="reviews" data-reveal-stagger="90">
+    {testimonials.map((testimonial) => <TestimonialCard testimonial={testimonial} />)}
+  </div>
+</Section>
+
+<style>
+  .reviews {
+    columns: 1;
+    column-gap: 1.15rem;
+  }
+
+  .reviews > :global(*) {
+    /* Impide que una tarjeta se parta entre dos columnas. */
+    break-inside: avoid;
+    margin-bottom: 1.15rem;
+  }
+
+  @media (min-width: 48rem) {
+    .reviews {
+      columns: 2;
+    }
+  }
+
+  @media (min-width: 72rem) {
+    .reviews {
+      columns: 3;
+    }
+  }
+</style>

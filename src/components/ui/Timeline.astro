@@ -1,0 +1,57 @@
+---
+/**
+ * LINEA TEMPORAL — la gira.
+ *
+ * Es una lista ORDENADA (`<ol>`) a proposito: el orden cronologico es
+ * informacion, no estilo. Un lector de pantalla anunciara "lista de 4
+ * elementos" y su posicion en ella, que es justo lo que interesa.
+ *
+ * El rail vertical se dibuja con un degradado sobre el propio contenedor:
+ * ni un elemento extra en el DOM.
+ */
+import { cn } from '@utils/cn';
+
+interface Props {
+  class?: string;
+  /** Etiqueta accesible del conjunto. */
+  label?: string;
+}
+
+const { class: className, label } = Astro.props;
+---
+
+<ol class={cn('timeline', className)} aria-label={label}>
+  <slot />
+</ol>
+
+<style>
+  .timeline {
+    position: relative;
+    margin: 0;
+    padding: 0 0 0 var(--timeline-offset, 1.75rem);
+    list-style: none;
+  }
+
+  /* El rail se desvanece por los extremos para que no parezca cortado. */
+  .timeline::before {
+    content: '';
+    position: absolute;
+    top: 0.6rem;
+    bottom: 0.6rem;
+    left: 0;
+    width: 1px;
+    background: linear-gradient(
+      180deg,
+      transparent,
+      var(--border-strong) 8%,
+      var(--border-strong) 92%,
+      transparent
+    );
+  }
+
+  @media (min-width: 48rem) {
+    .timeline {
+      --timeline-offset: 2.25rem;
+    }
+  }
+</style>

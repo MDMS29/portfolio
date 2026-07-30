@@ -1,0 +1,316 @@
+---
+/**
+ * PRELUDIO — se abre el telon.
+ *
+ * Es la unica seccion que no usa `Section`: no es un acto, es la apertura,
+ * y tiene su propia composicion a pantalla completa.
+ *
+ * Rendimiento: aqui esta el LCP de la pagina (el <h1>). Por eso NO lleva
+ * `data-reveal`. Ocultar el elemento mas grande de la primera pantalla para
+ * revelarlo despues es la forma mas rapida de arruinar la metrica: el titulo
+ * entra ya pintado y solo se animan los elementos secundarios.
+ *
+ * Las cifras no estan escritas a mano: se derivan de las colecciones, asi que
+ * anadir un proyecto actualiza el contador solo.
+ */
+import { Icon } from 'astro-icon/components';
+import Stage from '@components/theater/Stage.astro';
+import Button from '@components/ui/Button.astro';
+import SocialLinks from '@components/ui/SocialLinks.astro';
+import { SITE } from '@data/site';
+import { getAct } from '@data/navigation';
+import { getExperience, getProjects, getTech, getCertifications } from '@utils/collections';
+
+const act = getAct('apertura');
+const [experience, projects, tech, certifications] = await Promise.all([
+  getExperience(),
+  getProjects(),
+  getTech(),
+  getCertifications(),
+]);
+
+const currentYear = new Date().getFullYear();
+const firstYear = experience.length
+  ? Math.min(...experience.map((entry) => Number(entry.data.start.slice(0, 4))))
+  : currentYear;
+const years = Math.max(1, currentYear - firstYear);
+
+const stats = [
+  { value: `${years}+`, label: 'Años en escena' },
+  { value: String(projects.length), label: 'Obras estrenadas' },
+  { value: String(tech.length), label: 'Herramientas del oficio' },
+  { value: String(certifications.length), label: 'Galardones' },
+];
+---
+
+<section id="apertura" class="hero" aria-labelledby="hero-titulo">
+  <div class="stage-container">
+    <Stage size="full">
+      <div class="hero__layout">
+        <div class="hero__main">
+          <p class="hero__act">
+            <span class="hero__bulbs" aria-hidden="true">
+              <span></span><span></span><span></span>
+            </span>
+            {act.act} · {act.title}
+          </p>
+
+          <h1 id="hero-titulo" class="hero__title">
+            <span class="hero__name">{SITE.author.name}</span>
+            <span class="hero__role">{SITE.author.role}</span>
+          </h1>
+
+          <p class="hero__tagline">{SITE.author.tagline}</p>
+
+          <div class="hero__actions" data-reveal="rise" style="--reveal-delay:120ms">
+            <Button href="#proyectos" size="lg" iconEnd="lucide:arrow-down">Ver las obras</Button>
+            <Button href="#contacto" variant="secondary" size="lg" iconEnd="lucide:mail">
+              Hablemos
+            </Button>
+          </div>
+
+          <div class="hero__social" data-reveal="rise" style="--reveal-delay:200ms">
+            <SocialLinks primaryOnly label="Perfiles principales" />
+            {
+              SITE.author.availableForWork && (
+                <p class="hero__available">
+                  <span class="hero__dot" aria-hidden="true"></span>
+                  Disponible para nuevos proyectos
+                </p>
+              )
+            }
+          </div>
+        </div>
+
+        <dl class="hero__stats" data-reveal-stagger="110" aria-label="Resumen de trayectoria">
+          {
+            stats.map((stat) => (
+              <div class="hero__stat" data-reveal="fall">
+                <dt>{stat.label}</dt>
+                <dd>{stat.value}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+
+      <a class="hero__cue" href="#sobre-mi" aria-label="Ir al primer acto: sobre mí">
+        <span class="hero__cue-text">Comienza la obra</span>
+        <Icon name="lucide:chevron-down" class="hero__cue-icon" aria-hidden="true" />
+      </a>
+    </Stage>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+  }
+
+  .hero__layout {
+    display: grid;
+    gap: clamp(2.5rem, 6vw, 4rem);
+    align-items: center;
+  }
+
+  /* ------------------------------------------------------- rotulo */
+  .hero__act {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin: 0 0 1.25rem;
+    font-size: var(--text-2xs);
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  /* Bombillas de marquesina: tres puntos que parpadean en sucesion. */
+  .hero__bulbs {
+    display: inline-flex;
+    gap: 0.3rem;
+  }
+
+  .hero__bulbs span {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 8px currentColor;
+    animation: theater-flicker 3s ease-in-out infinite;
+  }
+
+  .hero__bulbs span:nth-child(2) {
+    animation-delay: 0.4s;
+  }
+
+  .hero__bulbs span:nth-child(3) {
+    animation-delay: 0.8s;
+  }
+
+  /* ------------------------------------------------------- titulo */
+  .hero__title {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin: 0;
+  }
+
+  .hero__name {
+    font-size: var(--text-5xl);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+  }
+
+  .hero__role {
+    font-family: var(--font-sans);
+    font-size: var(--text-lg);
+    font-weight: 400;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .hero__tagline {
+    max-width: 46ch;
+    margin: 1.5rem 0 0;
+    font-size: var(--text-lg);
+    color: var(--text-muted);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    margin-top: 2rem;
+  }
+
+  .hero__social {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .hero__available {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  .hero__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 0 3px rgb(34 197 94 / 0.18);
+  }
+
+  /* ------------------------------------------------------- cifras */
+  .hero__stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    margin: 0;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .hero__stat {
+    padding: clamp(1rem, 3vw, 1.5rem);
+    background: color-mix(in oklab, var(--surface) 70%, transparent);
+  }
+
+  .hero__stat dt {
+    font-size: var(--text-2xs);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+  }
+
+  .hero__stat dd {
+    margin: 0.3rem 0 0;
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    line-height: 1;
+    color: var(--text);
+  }
+
+  /* ------------------------------------------------------- llamada */
+  /*
+    La llamada al scroll se posiciona en absoluto sobre el escenario, asi que
+    solo aparece cuando hay sitio de sobra. En pantallas pequenas el hero ya
+    desborda el alto disponible y la senal se solaparia con las cifras.
+  */
+  .hero__cue {
+    display: none;
+    position: absolute;
+    left: 50%;
+    bottom: clamp(0.5rem, 3vh, 2rem);
+    translate: -50% 0;
+    flex-direction: column;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    text-decoration: none;
+    color: var(--text-subtle);
+    transition: color var(--dur-fast) var(--ease-soft);
+  }
+
+  .hero__cue:hover {
+    color: var(--accent);
+  }
+
+  .hero__cue-text {
+    font-size: 0.62rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+  }
+
+  .hero__cue-icon {
+    width: 1.1rem;
+    height: 1.1rem;
+    animation: cue-bounce 2.4s var(--ease-soft) infinite alternate;
+  }
+
+  @keyframes cue-bounce {
+    from {
+      transform: translate3d(0, -3px, 0);
+    }
+    to {
+      transform: translate3d(0, 5px, 0);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .hero__layout {
+      grid-template-columns: 1.55fr 1fr;
+    }
+
+    .hero__stats {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /* Solo con alto Y ancho suficientes: si la ventana es baja, la senal
+     volveria a pisar el contenido. */
+  @media (min-width: 64rem) and (min-height: 44rem) {
+    .hero__cue {
+      display: inline-flex;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__bulbs span,
+    .hero__cue-icon {
+      animation: none;
+    }
+  }
+</style>

@@ -1,0 +1,33 @@
+---
+/**
+ * Salto al contenido. Primer elemento enfocable del documento (WCAG 2.4.1).
+ * Permanece en el DOM siempre: ocultarlo con `display:none` lo sacaria del
+ * orden de tabulacion, que es justo lo contrario de lo que se pretende.
+ */
+---
+
+<a class="skip" href="#escenario">Saltar al contenido</a>
+
+<style>
+  .skip {
+    position: fixed;
+    z-index: calc(var(--z-curtain) + 1);
+    top: 0.75rem;
+    left: 0.75rem;
+    padding: 0.7rem 1.1rem;
+    border-radius: var(--radius-md);
+    background: var(--accent);
+    color: var(--accent-contrast);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: var(--elev-2);
+    /* Fuera de la vista, pero enfocable y anunciable. */
+    transform: translateY(-160%);
+    transition: transform var(--dur-fast) var(--ease-scene);
+  }
+
+  .skip:focus-visible {
+    transform: translateY(0);
+  }
+</style>

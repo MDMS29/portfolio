@@ -1,0 +1,57 @@
+[
+  {
+    "id": "aws-saa",
+    "title": "AWS Certified Solutions Architect — Associate",
+    "issuer": "Amazon Web Services",
+    "issuerIcon": "simple-icons:amazonwebservices",
+    "date": "2024-05",
+    "credentialId": "AWS-SAA-000000",
+    "url": "https://example.com",
+    "skills": ["Arquitectura cloud", "Redes", "Coste", "Alta disponibilidad"]
+  },
+  {
+    "id": "iaap-cpwa",
+    "title": "Certified Professional in Web Accessibility",
+    "issuer": "IAAP",
+    "issuerIcon": "lucide:accessibility",
+    "date": "2023-11",
+    "credentialId": "CPWA-000000",
+    "url": "https://example.com",
+    "skills": ["WCAG 2.2", "ARIA", "Lectores de pantalla"]
+  },
+  {
+    "id": "meta-frontend",
+    "title": "Meta Front-End Developer Professional",
+    "issuer": "Meta",
+    "issuerIcon": "simple-icons:meta",
+    "date": "2022-08",
+    "url": "https://example.com",
+    "skills": ["React", "UX", "Testing"]
+  },
+  {
+    "id": "ckad",
+    "title": "Certified Kubernetes Application Developer",
+    "issuer": "Cloud Native Computing Foundation",
+    "issuerIcon": "simple-icons:kubernetes",
+    "date": "2023-03",
+    "credentialId": "CKAD-000000",
+    "skills": ["Kubernetes", "Contenedores", "Observabilidad"]
+  },
+  {
+    "id": "postgres-pro",
+    "title": "PostgreSQL Advanced Performance",
+    "issuer": "EDB",
+    "issuerIcon": "simple-icons:postgresql",
+    "date": "2022-02",
+    "skills": ["Índices", "Planes de consulta", "Particionado"]
+  },
+  {
+    "id": "google-ux",
+    "title": "Google UX Design Professional",
+    "issuer": "Google",
+    "issuerIcon": "simple-icons:google",
+    "date": "2021-09",
+    "url": "https://example.com",
+    "skills": ["Investigación", "Prototipado", "Usabilidad"]
+  }
+]

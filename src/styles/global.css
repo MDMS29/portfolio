@@ -1,0 +1,209 @@
+@import 'tailwindcss';
+@import './tokens.css';
+@import './theater.css' layer(components);
+
+/* Modo oscuro por clase en <html>, aplicada por el script inline del <head>
+   antes del primer pintado (sin FOUC). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================================================
+   TOKENS ESTATICOS -> UTILIDADES DE TAILWIND
+   No dependen del tema, asi que se declaran directamente.
+   ========================================================================= */
+@theme {
+  --font-display: 'Playfair Display Variable', 'Iowan Old Style', Georgia, serif;
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Escala tipografica fluida: un solo token sirve de movil a desktop. */
+  --text-2xs: 0.75rem;
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-base: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
+  --text-lg: clamp(1.125rem, 1.06rem + 0.3vw, 1.25rem);
+  --text-xl: clamp(1.3rem, 1.18rem + 0.6vw, 1.55rem);
+  --text-2xl: clamp(1.65rem, 1.4rem + 1.2vw, 2.15rem);
+  --text-3xl: clamp(2.05rem, 1.6rem + 2.2vw, 2.9rem);
+  --text-4xl: clamp(2.5rem, 1.8rem + 3.4vw, 4rem);
+  --text-5xl: clamp(3rem, 1.9rem + 5.2vw, 5.5rem);
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+
+  --container-stage: 76rem;
+  --container-prose: 42rem;
+
+  /* Curvas de animacion con nombre: describen intencion, no numeros. */
+  --ease-scene: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-curtain: cubic-bezier(0.65, 0.02, 0.28, 1);
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out-back: cubic-bezier(0.34, 1.36, 0.64, 1);
+}
+
+/* ============================================================================
+   TOKENS DEPENDIENTES DEL TEMA -> UTILIDADES
+   `inline` es imprescindible: hace que `bg-surface` compile a `var(--surface)`
+   en lugar de copiar el valor, de modo que cambiar de tema recolorea todo
+   sin regenerar una sola clase.
+   ========================================================================= */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-deep: var(--bg-deep);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-sunken: var(--surface-sunken);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-text: var(--text);
+  --color-muted: var(--text-muted);
+  --color-subtle: var(--text-subtle);
+  --color-inverse: var(--text-inverse);
+
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-contrast: var(--accent-contrast);
+
+  --color-curtain: var(--curtain);
+  --color-curtain-deep: var(--curtain-deep);
+
+  --shadow-elev-1: var(--elev-1);
+  --shadow-elev-2: var(--elev-2);
+  --shadow-elev-3: var(--elev-3);
+  --shadow-glow: var(--glow);
+}
+
+/* ============================================================================
+   BASE
+   ========================================================================= */
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--border);
+    min-width: 0;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-block-start: calc(var(--nav-h, 4.5rem) + 1.5rem);
+    tab-size: 4;
+  }
+
+  /* El scroll suave solo si el usuario no ha pedido lo contrario.
+     Se aplica aqui y no en JS: cero coste, cero bloqueo del hilo. */
+  @media (prefers-reduced-motion: no-preference) {
+    html:where([data-motion='on']) {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: 1.65;
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: clip;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  p,
+  li {
+    text-wrap: pretty;
+  }
+
+  :where(a) {
+    color: inherit;
+    text-underline-offset: 0.2em;
+  }
+
+  /* Un unico anillo de foco, visible en ambos temas y sobre cualquier fondo. */
+  :where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
+  }
+
+  ::selection {
+    background-color: var(--accent);
+    color: var(--accent-contrast);
+  }
+
+  :where(img, svg, video, canvas) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+}
+
+/* ============================================================================
+   UTILIDADES PROPIAS
+   ========================================================================= */
+
+/* Contenedor del escenario: ancho maximo + gutter fluido en una sola clase. */
+@utility stage-container {
+  width: 100%;
+  max-width: var(--container-stage);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Texto que solo leen los lectores de pantalla. */
+@utility sr-only-focusable {
+  &:not(:focus):not(:focus-within) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* Degradado de laton/carmesi para titulos destacados. */
+@utility text-gilded {
+  background-image: linear-gradient(
+    100deg,
+    var(--text) 0%,
+    var(--accent-strong) 45%,
+    var(--accent) 60%,
+    var(--text) 100%
+  );
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Borde de 1px con degradado, sin pseudo-elementos extra. */
+@utility gilded-edge {
+  border: 1px solid transparent;
+  background-image:
+    linear-gradient(var(--surface), var(--surface)),
+    linear-gradient(135deg, var(--border-strong), var(--accent), var(--border));
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}

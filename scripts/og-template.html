@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Plantilla de la imagen Open Graph</title>
+    <!--
+      Fuente de la imagen social (/public/og/portada.png).
+
+      Para regenerarla tras cambiar tu nombre o tu rol:
+        1. abre este archivo en un navegador Chromium,
+        2. captura la tarjeta a 1200x630 exactos,
+        3. guarda el PNG en `public/og/portada.png`.
+
+      Se mantiene como HTML estatico a proposito: generar la imagen en cada
+      build exigiria satori + resvg (~8 MB de dependencias) para un archivo
+      que cambia una vez al ano.
+    -->
+    <style>
+      @font-face {
+        font-family: 'Playfair Display';
+        src: local('Playfair Display'), local('Georgia');
+      }
+      * {
+        margin: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+      }
+      .card {
+        position: relative;
+        width: 1200px;
+        height: 630px;
+        padding: 72px 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        background:
+          radial-gradient(120% 70% at 50% -10%, rgb(224 176 87 / 0.28), transparent 55%),
+          radial-gradient(80% 50% at 0% 100%, rgb(224 176 87 / 0.18), transparent 60%),
+          linear-gradient(160deg, #0b0a0f, #131119 60%, #060509);
+        color: #f4f1ea;
+        font-family: 'Inter', system-ui, sans-serif;
+        overflow: hidden;
+      }
+      /* Telones laterales */
+      .card::before,
+      .card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 90px;
+        background:
+          repeating-linear-gradient(90deg, rgb(0 0 0 / 0.3) 0 2px, transparent 2px 14px),
+          linear-gradient(180deg, #3e0a17, #6d1226 45%, #3e0a17);
+      }
+      .card::before {
+        left: 0;
+      }
+      .card::after {
+        right: 0;
+      }
+      .inner {
+        position: relative;
+        z-index: 1;
+        padding-inline: 40px;
+      }
+      .act {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: #e0b057;
+      }
+      .rule {
+        width: 56px;
+        height: 1px;
+        background: currentColor;
+        opacity: 0.6;
+      }
+      h1 {
+        margin-top: 28px;
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 104px;
+        line-height: 0.95;
+        letter-spacing: -0.03em;
+      }
+      .role {
+        margin-top: 14px;
+        font-size: 28px;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+        color: #e0b057;
+      }
+      .tagline {
+        margin-top: 30px;
+        max-width: 780px;
+        font-size: 26px;
+        line-height: 1.5;
+        color: #b5aec0;
+      }
+      .foot {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding-inline: 40px;
+        font-size: 20px;
+        color: #7e7690;
+      }
+      .mark {
+        display: grid;
+        place-items: center;
+        width: 52px;
+        height: 52px;
+        border-radius: 10px;
+        background: linear-gradient(140deg, #e0b057, #6d1226);
+        color: #1a1206;
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 22px;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="inner">
+        <p class="act"><span class="rule"></span>Se abre el telón</p>
+        <h1>Alex Rivera</h1>
+        <p class="role">Desarrollador Full Stack</p>
+        <p class="tagline">
+          Construyo productos web que se sienten como deben sentirse. Una obra en nueve actos.
+        </p>
+      </div>
+      <div class="foot">
+        <span class="mark">AR</span>
+        <span>tu-dominio.com</span>
+      </div>
+    </div>
+  </body>
+</html>

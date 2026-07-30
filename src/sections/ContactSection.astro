@@ -1,0 +1,342 @@
+---
+/**
+ * EPILOGO — tras el telon.
+ *
+ * Decision consciente: el formulario SOLO se pinta si hay un endpoint
+ * configurado en `SITE.contact.formEndpoint`. Un formulario que no envia
+ * nada es peor que no tenerlo: el visitante escribe, pulsa y su mensaje se
+ * pierde sin que nadie se entere. Sin endpoint, la seccion ofrece el correo,
+ * que siempre funciona.
+ *
+ * Accesibilidad del formulario: cada campo tiene <label> visible (no
+ * placeholder como etiqueta), las ayudas se enlazan con `aria-describedby`
+ * y el campo trampa antispam se oculta de la vista Y del arbol accesible.
+ */
+import { Icon } from 'astro-icon/components';
+import Section from '@components/ui/Section.astro';
+import Card from '@components/ui/Card.astro';
+import Button from '@components/ui/Button.astro';
+import SocialLinks from '@components/ui/SocialLinks.astro';
+import { SITE } from '@data/site';
+
+const { email, location, timezone } = SITE.author;
+const { formEndpoint, schedulingUrl, responseTime } = SITE.contact;
+---
+
+<Section
+  id="contacto"
+  align={formEndpoint ? 'left' : 'center'}
+  lead="Si has llegado hasta aquí, algo te ha interesado. Cuéntame en qué estás trabajando y te digo con franqueza si puedo ayudarte."
+>
+  <div class:list={['contact', !formEndpoint && 'contact--single']}>
+    <Card variant="sunken" padding="lg" class="contact__card" data-reveal="rise">
+      <h3 class="contact__heading">Escríbeme directamente</h3>
+
+      <p class="contact__email">
+        <a href={`mailto:${email}`}>{email}</a>
+        <button
+          type="button"
+          class="contact__copy"
+          data-copy-email
+          data-email={email}
+          aria-label="Copiar mi dirección de correo al portapapeles"
+        >
+          <Icon name="lucide:copy" aria-hidden="true" />
+        </button>
+      </p>
+
+      <!-- Region viva: anuncia el resultado de copiar sin robar el foco. -->
+      <p class="contact__feedback" data-copy-feedback role="status" aria-live="polite"></p>
+
+      <ul class="contact__facts">
+        <li>
+          <Icon name="lucide:map-pin" aria-hidden="true" />
+          {location} · {timezone}
+        </li>
+        <li>
+          <Icon name="lucide:clock" aria-hidden="true" />
+          {responseTime}
+        </li>
+      </ul>
+
+      {
+        schedulingUrl && (
+          <Button href={schedulingUrl} variant="secondary" iconEnd="lucide:calendar" class="contact__schedule">
+            Reservar una llamada
+          </Button>
+        )
+      }
+
+      <div class="contact__socials">
+        <SocialLinks variant="labels" label="Otras formas de encontrarme" />
+      </div>
+    </Card>
+
+    {
+      formEndpoint && (
+        <Card padding="lg" class="contact__card" data-reveal="rise" style="--reveal-delay:120ms">
+          <h3 class="contact__heading">O deja un mensaje</h3>
+
+          <form class="form" action={formEndpoint} method="post">
+            <div class="form__field">
+              <label for="contacto-nombre">Nombre</label>
+              <input
+                id="contacto-nombre"
+                name="nombre"
+                type="text"
+                autocomplete="name"
+                required
+                maxlength="80"
+              />
+            </div>
+
+            <div class="form__field">
+              <label for="contacto-email">Correo electrónico</label>
+              <input
+                id="contacto-email"
+                name="email"
+                type="email"
+                autocomplete="email"
+                required
+                aria-describedby="contacto-email-ayuda"
+              />
+              <p id="contacto-email-ayuda" class="form__hint">
+                Solo lo uso para responderte.
+              </p>
+            </div>
+
+            <div class="form__field">
+              <label for="contacto-mensaje">Mensaje</label>
+              <textarea
+                id="contacto-mensaje"
+                name="mensaje"
+                rows="5"
+                required
+                maxlength="2000"
+                aria-describedby="contacto-mensaje-ayuda"
+              ></textarea>
+              <p id="contacto-mensaje-ayuda" class="form__hint">
+                Qué construyes, en qué punto estás y qué plazo manejas.
+              </p>
+            </div>
+
+            {/* Trampa antispam: invisible para personas y para lectores de
+                pantalla, pero rellenada por los bots que envían a ciegas. */}
+            <div class="form__honeypot" aria-hidden="true">
+              <label for="contacto-web">No rellenar</label>
+              <input id="contacto-web" name="_gotcha" type="text" tabindex="-1" autocomplete="off" />
+            </div>
+
+            <Button type="submit" size="lg" iconEnd="lucide:send" block>
+              Enviar el mensaje
+            </Button>
+          </form>
+        </Card>
+      )
+    }
+  </div>
+</Section>
+
+<script>
+  // Copiar al portapapeles. Delegado en `document` para sobrevivir a las
+  // View Transitions, y con reserva para navegadores sin Clipboard API.
+  document.addEventListener('click', async (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    const trigger = target.closest<HTMLElement>('[data-copy-email]');
+    if (!trigger) return;
+
+    const email = trigger.dataset.email ?? '';
+    const feedback = document.querySelector<HTMLElement>('[data-copy-feedback]');
+
+    try {
+      await navigator.clipboard.writeText(email);
+      if (feedback) feedback.textContent = 'Dirección copiada al portapapeles.';
+    } catch {
+      // Sin permiso de portapapeles (o sin HTTPS): el correo sigue siendo
+      // seleccionable y el enlace mailto sigue funcionando.
+      if (feedback) feedback.textContent = `No he podido copiarla. Mi correo es ${email}`;
+    }
+  });
+</script>
+
+<style>
+  .contact {
+    display: grid;
+    gap: 1.25rem;
+    align-items: start;
+  }
+
+  .contact__card {
+    height: 100%;
+  }
+
+  .contact__heading {
+    margin: 0 0 1rem;
+    font-size: var(--text-xl);
+  }
+
+  .contact__email {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+  }
+
+  .contact__email a {
+    color: var(--accent);
+    text-decoration: none;
+    word-break: break-word;
+  }
+
+  .contact__email a:hover {
+    text-decoration: underline;
+  }
+
+  .contact__copy {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    flex: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition:
+      color var(--dur-fast) var(--ease-soft),
+      border-color var(--dur-fast) var(--ease-soft);
+  }
+
+  .contact__copy:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .contact__copy :global(svg) {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+
+  .contact__feedback {
+    min-height: 1.25rem;
+    margin: 0.5rem 0 0;
+    font-size: var(--text-xs);
+    color: var(--accent);
+  }
+
+  .contact__facts {
+    display: grid;
+    gap: 0.6rem;
+    margin: 1.25rem 0 0;
+    padding: 1.25rem 0 0;
+    border-top: 1px solid var(--border);
+    list-style: none;
+  }
+
+  .contact__facts li {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+
+  .contact__facts :global(svg) {
+    width: 1rem;
+    height: 1rem;
+    flex: none;
+    color: var(--accent);
+  }
+
+  .contact__schedule {
+    margin-top: 1.25rem;
+  }
+
+  .contact__socials {
+    margin-top: 1.5rem;
+  }
+
+  /* ------------------------------------------------------- formulario */
+  .form {
+    display: grid;
+    gap: 1.1rem;
+  }
+
+  .form__field {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .form__field label {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .form__field input,
+  .form__field textarea {
+    width: 100%;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: var(--text-sm);
+    transition:
+      border-color var(--dur-fast) var(--ease-soft),
+      box-shadow var(--dur-fast) var(--ease-soft);
+  }
+
+  .form__field textarea {
+    resize: vertical;
+    min-height: 7rem;
+  }
+
+  .form__field input:focus,
+  .form__field textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  /* Solo marca el error DESPUES de intentar enviar, nunca mientras se
+     escribe: `:user-invalid` evita el clasico campo en rojo al primer teclazo. */
+  .form__field input:user-invalid,
+  .form__field textarea:user-invalid {
+    border-color: var(--curtain);
+  }
+
+  .form__hint {
+    margin: 0;
+    font-size: var(--text-2xs);
+    color: var(--text-subtle);
+  }
+
+  .form__honeypot {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  @media (min-width: 56rem) {
+    .contact {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .contact--single {
+      grid-template-columns: minmax(0, 34rem);
+      justify-content: center;
+    }
+  }
+</style>

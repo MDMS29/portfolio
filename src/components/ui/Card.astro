@@ -1,0 +1,122 @@
+---
+/**
+ * TARJETA — la superficie base de todo el sistema.
+ *
+ * Las tarjetas de dominio (proyecto, servicio, testimonio, certificacion) NO
+ * repiten estos estilos: componen sobre esta. Cambiar aqui el radio o la
+ * elevacion los cambia en las cuatro.
+ *
+ * `interactive` activa el brillo que sigue al cursor. El resplandor se pinta
+ * en un pseudo-elemento POR DEBAJO del contenido (`z-index: 0` frente a `1`),
+ * de modo que nunca se interpone entre el texto y el lector.
+ */
+import { cn } from '@utils/cn';
+import type { HTMLAttributes } from 'astro/types';
+
+type Variant = 'surface' | 'outline' | 'sunken';
+
+interface Props extends HTMLAttributes<'div'> {
+  as?: 'div' | 'article' | 'li' | 'section' | 'figure';
+  variant?: Variant;
+  /** Anade elevacion al pasar el cursor y brillo de reflector. */
+  interactive?: boolean;
+  padding?: 'none' | 'sm' | 'md' | 'lg';
+  class?: string;
+}
+
+const {
+  as: Tag = 'div',
+  variant = 'surface',
+  interactive = false,
+  padding = 'md',
+  class: className,
+  ...rest
+} = Astro.props;
+---
+
+<Tag
+  class={cn('card', `card--${variant}`, `card--pad-${padding}`, interactive && 'card--interactive', className)}
+  {...interactive ? { 'data-spotlight-surface': '' } : {}}
+  {...rest}
+>
+  <div class="card__body">
+    <slot />
+  </div>
+</Tag>
+
+<style>
+  .card {
+    position: relative;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    isolation: isolate;
+    transition:
+      transform var(--dur-base) var(--ease-scene),
+      border-color var(--dur-base) var(--ease-soft),
+      box-shadow var(--dur-base) var(--ease-soft);
+  }
+
+  .card--outline {
+    background: transparent;
+  }
+
+  .card--sunken {
+    background: color-mix(in oklab, var(--surface-sunken) 70%, transparent);
+  }
+
+  .card__body {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+  }
+
+  .card--pad-none .card__body {
+    padding: 0;
+  }
+  .card--pad-sm .card__body {
+    padding: 1rem;
+  }
+  .card--pad-md .card__body {
+    padding: clamp(1.15rem, 2.5vw, 1.6rem);
+  }
+  .card--pad-lg .card__body {
+    padding: clamp(1.5rem, 3.5vw, 2.25rem);
+  }
+
+  /* ----------------------------------------------------- interactiva */
+  .card--interactive::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur-base) var(--ease-soft);
+    background: radial-gradient(
+      280px circle at var(--surface-x, 50%) var(--surface-y, 0%),
+      var(--accent-soft),
+      transparent 72%
+    );
+  }
+
+  .card--interactive:hover,
+  .card--interactive:focus-within {
+    transform: translateY(-4px);
+    border-color: color-mix(in oklab, var(--accent) 45%, var(--border));
+    box-shadow: var(--elev-2);
+  }
+
+  .card--interactive:hover::before,
+  .card--interactive:focus-within::before {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card--interactive:hover,
+    .card--interactive:focus-within {
+      transform: none;
+    }
+  }
+</style>

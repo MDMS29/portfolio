@@ -1,0 +1,101 @@
+---
+/**
+ * INSIGNIA DE TECNOLOGIA.
+ *
+ * Acepta la entrada completa de la coleccion o solo un nombre suelto, porque
+ * se usa en dos contextos distintos: el repertorio (datos completos) y las
+ * etiquetas sueltas de un proyecto.
+ */
+import { Icon } from 'astro-icon/components';
+import type { TechEntry } from '@utils/collections';
+import { cn } from '@utils/cn';
+
+interface Props {
+  tech?: TechEntry;
+  /** Alternativa cuando no hay entrada de coleccion. */
+  label?: string;
+  icon?: string;
+  size?: 'sm' | 'md';
+  /** Marca visualmente el nivel de dominio. */
+  showLevel?: boolean;
+  class?: string;
+}
+
+const { tech, label, icon, size = 'md', showLevel = false, class: className } = Astro.props;
+
+const name = tech?.data.name ?? label ?? '';
+const iconName = tech?.data.icon ?? icon;
+const level = tech?.data.level;
+
+const LEVEL_TEXT: Record<string, string> = {
+  nucleo: 'Uso diario',
+  solido: 'Sólido',
+  'en-uso': 'En uso',
+};
+---
+
+<span class={cn('badge', `badge--${size}`, level && `badge--${level}`, className)}>
+  {iconName && <Icon name={iconName} class="badge__icon" aria-hidden="true" />}
+  <span class="badge__name">{name}</span>
+  {
+    showLevel && level && (
+      <>
+        {/* El nivel se comunica con texto, no solo con color (WCAG 1.4.1). */}
+        <span class="badge__level">{LEVEL_TEXT[level]}</span>
+      </>
+    )
+  }
+</span>
+
+<style>
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text-muted);
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    transition:
+      border-color var(--dur-fast) var(--ease-soft),
+      color var(--dur-fast) var(--ease-soft);
+  }
+
+  .badge--sm {
+    padding: 0.3rem 0.6rem;
+    font-size: var(--text-2xs);
+  }
+
+  .badge--md {
+    padding: 0.45rem 0.85rem;
+    font-size: var(--text-xs);
+  }
+
+  .badge__icon {
+    width: 1em;
+    height: 1em;
+    flex: none;
+  }
+
+  .badge--nucleo {
+    border-color: color-mix(in oklab, var(--accent) 40%, var(--border));
+    color: var(--text);
+  }
+
+  .badge--nucleo .badge__icon {
+    color: var(--accent);
+  }
+
+  .badge__level {
+    padding-left: 0.5rem;
+    margin-left: 0.1rem;
+    border-left: 1px solid var(--border);
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+  }
+</style>

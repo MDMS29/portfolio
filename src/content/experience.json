@@ -1,0 +1,68 @@
+[
+  {
+    "id": "lumen-labs",
+    "role": "Staff Frontend Engineer",
+    "company": "Lumen Labs",
+    "companyUrl": "https://example.com",
+    "start": "2023-02",
+    "end": null,
+    "location": "Madrid, España",
+    "mode": "remoto",
+    "summary": "Dirijo la plataforma de interfaz que comparten seis equipos de producto: sistema de diseño, rendimiento y el listón técnico del frontend.",
+    "highlights": [
+      "Sistema de diseño en tokens adoptado por 6 equipos; el tiempo de arranque de una pantalla nueva bajó de 3 días a medio día.",
+      "Presupuesto de rendimiento en CI: bloquea el merge si el bundle o el LCP empeoran. El p75 de LCP pasó de 3,4 s a 1,6 s.",
+      "Migración incremental de una SPA de 180k líneas a renderizado en servidor, sin congelar la entrega de producto.",
+      "Auditoría WCAG 2.2 AA y mentoría de accesibilidad; las incidencias reportadas cayeron un 80 %."
+    ],
+    "stack": ["typescript", "react", "nextjs", "tailwindcss", "playwright", "github-actions"]
+  },
+  {
+    "id": "cartel-studio",
+    "role": "Senior Full Stack Developer",
+    "company": "Cartel Studio",
+    "companyUrl": "https://example.com",
+    "start": "2021-04",
+    "end": "2023-01",
+    "location": "Barcelona, España",
+    "mode": "hibrido",
+    "summary": "Producto de comercio electrónico de extremo a extremo para marcas de moda: catálogo, pagos y el panel interno que lo gobierna.",
+    "highlights": [
+      "Rediseño del checkout guiado por datos: +18 % de conversión en móvil en un trimestre.",
+      "API de catálogo en Fastify con caché por etiquetas en Redis; la p95 bajó de 820 ms a 140 ms.",
+      "Pipeline de despliegue con vistas previas por rama y migraciones reversibles."
+    ],
+    "stack": ["typescript", "react", "nodejs", "fastify", "postgresql", "redis", "docker"]
+  },
+  {
+    "id": "nova-digital",
+    "role": "Frontend Developer",
+    "company": "Nova Digital",
+    "start": "2019-09",
+    "end": "2021-03",
+    "location": "Valencia, España",
+    "mode": "presencial",
+    "summary": "Desarrollo de productos a medida para clientes de sectores muy distintos, con equipos pequeños y plazos cortos.",
+    "highlights": [
+      "Once proyectos entregados en dieciocho meses, todos con Lighthouse por encima de 90.",
+      "Primera librería de componentes compartida de la agencia, documentada en Storybook.",
+      "Introduje TypeScript y revisiones de código; las regresiones en producción se redujeron a la mitad."
+    ],
+    "stack": ["typescript", "react", "nodejs", "tailwindcss", "storybook"]
+  },
+  {
+    "id": "freelance",
+    "role": "Desarrollador Freelance",
+    "company": "Por cuenta propia",
+    "start": "2018-06",
+    "end": "2019-08",
+    "location": "Remoto",
+    "mode": "remoto",
+    "summary": "Sitios y pequeñas aplicaciones para negocios locales y startups en fase inicial. Donde aprendí que el rendimiento es una decisión de negocio.",
+    "highlights": [
+      "Catorce clientes atendidos de principio a fin: propuesta, desarrollo, despliegue y mantenimiento.",
+      "Plantilla propia de arranque que redujo el tiempo de puesta en marcha de una semana a un día."
+    ],
+    "stack": ["typescript", "react", "nodejs", "postgresql"]
+  }
+]

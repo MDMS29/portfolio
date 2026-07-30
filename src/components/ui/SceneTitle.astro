@@ -1,0 +1,98 @@
+---
+/**
+ * CABECERA DE ESCENA — el cartel que anuncia cada acto.
+ *
+ * Los retardos del revelado se calculan AQUI, en build, y viajan como estilo
+ * inline. El runtime no tiene que recorrer el DOM para escalonar la entrada:
+ * cuando el observador dispara, la cascada ya esta escrita.
+ */
+import { cn } from '@utils/cn';
+
+interface Props {
+  /** Id del <h2>, referenciado por el aria-labelledby de la seccion. */
+  headingId: string;
+  /** Rotulo del acto: "Acto III". */
+  act?: string;
+  title: string;
+  lead?: string;
+  align?: 'left' | 'center';
+  class?: string;
+}
+
+const { headingId, act, title, lead, align = 'left', class: className } = Astro.props;
+---
+
+<header class={cn('scene', `scene--${align}`, className)}>
+  {
+    act && (
+      <p class="scene__act" data-reveal="fade">
+        <span class="scene__rule" aria-hidden="true"></span>
+        {act}
+      </p>
+    )
+  }
+
+  <h2 id={headingId} class="scene__title" data-reveal="unveil" style="--reveal-delay:80ms">
+    {title}
+  </h2>
+
+  {
+    lead && (
+      <p class="scene__lead" data-reveal="rise" style="--reveal-delay:170ms">
+        {lead}
+      </p>
+    )
+  }
+
+  <slot />
+</header>
+
+<style>
+  .scene {
+    margin-bottom: var(--act-gap);
+    max-width: 62ch;
+  }
+
+  .scene--center {
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .scene__act {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin: 0 0 0.9rem;
+    font-size: var(--text-2xs);
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .scene--center .scene__act {
+    justify-content: center;
+  }
+
+  .scene__rule {
+    width: 2.5rem;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.55;
+  }
+
+  .scene__title {
+    margin: 0;
+    font-size: var(--text-3xl);
+  }
+
+  .scene__lead {
+    margin: 1rem 0 0;
+    font-size: var(--text-lg);
+    color: var(--text-muted);
+  }
+
+  .scene--center .scene__lead {
+    margin-inline: auto;
+  }
+</style>

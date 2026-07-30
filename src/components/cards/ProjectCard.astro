@@ -1,0 +1,337 @@
+---
+/**
+ * TARJETA DE PROYECTO.
+ *
+ * Dos detalles que suelen hacerse mal y aqui estan resueltos:
+ *
+ * 1. ENLACE EXTENDIDO. Toda la tarjeta es clicable, pero en el DOM solo hay
+ *    UN enlace principal (el titulo) cuyo `::after` cubre la superficie. Los
+ *    enlaces secundarios (demo, repo) se elevan por encima. Resultado: un
+ *    unico destino en el orden de tabulacion, sin anidar interactivos, y un
+ *    nombre accesible real en lugar de "enlace, tarjeta".
+ *
+ * 2. VIEW TRANSITIONS. El cartel y el titulo comparten `transition:name` con
+ *    la pagina de detalle, asi que al abrir el caso de estudio la imagen
+ *    crece hasta su nueva posicion en vez de parpadear. Es el unico sitio del
+ *    proyecto donde las View Transitions aportan algo real.
+ */
+import { Icon } from 'astro-icon/components';
+import Card from '@components/ui/Card.astro';
+import TechBadge from '@components/ui/TechBadge.astro';
+import ProjectPoster from './ProjectPoster.astro';
+import type { ProjectEntry, TechEntry } from '@utils/collections';
+import { cn } from '@utils/cn';
+
+interface Props {
+  project: ProjectEntry;
+  /** Ya resuelto por la seccion: la tarjeta no consulta colecciones. */
+  stack: TechEntry[];
+  /** Formato ancho para las obras destacadas. */
+  featured?: boolean;
+  index?: number;
+  class?: string;
+}
+
+const { project, stack, featured = false, index = 0, class: className } = Astro.props;
+const { title, tagline, year, role, status, accent, tags, links, metrics } = project.data;
+
+const href = `/proyectos/${project.id}`;
+
+const STATUS_LABEL: Record<typeof status, string> = {
+  produccion: 'En producción',
+  beta: 'En beta',
+  archivado: 'Archivado',
+};
+
+// Las destacadas muestran mas contexto; el resto, lo justo para decidir.
+const visibleStack = featured ? stack.slice(0, 6) : stack.slice(0, 4);
+const hiddenStack = stack.length - visibleStack.length;
+---
+
+<Card
+  as="article"
+  interactive
+  padding="none"
+  class={cn('project', featured && 'project--featured', className)}
+  data-reveal="rise"
+>
+  <div class="project__grid">
+    {/* El nombre de transicion va en el envoltorio HTML: las directivas
+        `transition:*` actuan sobre elementos, no sobre componentes. */}
+    <div class="project__media" transition:name={`poster-${project.id}`}>
+      <ProjectPoster title={title} accent={accent} year={year} seed={index} />
+    </div>
+
+    <div class="project__body">
+      <p class="project__meta">
+        <span class={cn('project__status', `project__status--${status}`)}>
+          {STATUS_LABEL[status]}
+        </span>
+        <span class="project__role">{role}</span>
+      </p>
+
+      <h3 class="project__title">
+        <a href={href} class="project__link" transition:name={`titulo-${project.id}`}>
+          {title}
+        </a>
+      </h3>
+
+      <p class="project__tagline">{tagline}</p>
+
+      {
+        featured && metrics.length > 0 && (
+          <dl class="project__metrics">
+            {metrics.map((metric) => (
+              <div class="project__metric">
+                <dt>{metric.label}</dt>
+                <dd>{metric.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )
+      }
+
+      <ul class="project__tags" aria-label="Ámbito del proyecto">
+        {tags.map((tag) => <li class="project__tag">{tag}</li>)}
+      </ul>
+
+      <div class="project__stack">
+        {visibleStack.map((tech) => <TechBadge tech={tech} size="sm" />)}
+        {hiddenStack > 0 && <span class="project__more">+{hiddenStack}</span>}
+      </div>
+
+      {
+        (links.demo || links.repo) && (
+          <div class="project__links">
+            {links.demo && (
+              <a
+                class="project__external"
+                href={links.demo}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Ver ${title} en producción (se abre en una pestaña nueva)`}
+              >
+                <Icon name="lucide:external-link" aria-hidden="true" />
+                Ver en vivo
+              </a>
+            )}
+            {links.repo && (
+              <a
+                class="project__external"
+                href={links.repo}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Ver el código de ${title} en GitHub (se abre en una pestaña nueva)`}
+              >
+                <Icon name="simple-icons:github" aria-hidden="true" />
+                Código
+              </a>
+            )}
+          </div>
+        )
+      }
+    </div>
+  </div>
+</Card>
+
+<style>
+  .project {
+    height: 100%;
+  }
+
+  .project__grid {
+    display: grid;
+    height: 100%;
+  }
+
+  .project__media {
+    padding: 0.75rem 0.75rem 0;
+  }
+
+  .project__body {
+    display: flex;
+    flex-direction: column;
+    padding: 1.1rem clamp(1.1rem, 2.5vw, 1.5rem) clamp(1.1rem, 2.5vw, 1.5rem);
+  }
+
+  .project__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.6rem;
+    font-size: var(--text-2xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+  }
+
+  .project__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  /* El estado se lee, no solo se ve: el punto es un refuerzo, no el mensaje. */
+  .project__status::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .project__status--produccion {
+    color: #22a06b;
+  }
+
+  .project__status--beta {
+    color: var(--accent);
+  }
+
+  .project__title {
+    margin: 0;
+    font-size: var(--text-2xl);
+  }
+
+  .project__link {
+    text-decoration: none;
+    color: var(--text);
+    transition: color var(--dur-fast) var(--ease-soft);
+  }
+
+  .project__link:hover {
+    color: var(--accent);
+  }
+
+  /* Enlace extendido: el area clicable es la tarjeta entera. */
+  .project__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+  }
+
+  .project__tagline {
+    margin: 0.55rem 0 0;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .project__metrics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin: 1.15rem 0 0;
+    padding: 0.9rem 0 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .project__metric dt {
+    font-size: var(--text-2xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+  }
+
+  .project__metric dd {
+    margin: 0.15rem 0 0;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    color: var(--accent);
+  }
+
+  .project__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .project__tag {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+  }
+
+  .project__tag:not(:last-child)::after {
+    content: '·';
+    margin-left: 0.35rem;
+  }
+
+  .project__stack {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0.85rem 0 0;
+  }
+
+  .project__more {
+    font-size: var(--text-2xs);
+    color: var(--text-subtle);
+  }
+
+  .project__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    /* `margin-top:auto` alinea el pie de todas las tarjetas de la fila. */
+    margin-top: auto;
+    padding-top: 1.15rem;
+  }
+
+  .project__external {
+    /* Por encima del enlace extendido: son destinos distintos. */
+    position: relative;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+
+  .project__external:hover {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+
+  .project__external :global(svg) {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+
+  /* ------------------------------------------------------ destacada */
+  @media (min-width: 56rem) {
+    .project--featured .project__grid {
+      grid-template-columns: 1.05fr 1fr;
+      align-items: stretch;
+    }
+
+    .project--featured .project__media {
+      padding: 0.75rem 0 0.75rem 0.75rem;
+    }
+
+    .project--featured .project__media :global(.poster) {
+      height: 100%;
+      aspect-ratio: auto;
+    }
+
+    .project--featured .project__title {
+      font-size: var(--text-3xl);
+    }
+
+    .project--featured .project__tagline {
+      font-size: var(--text-base);
+    }
+  }
+</style>

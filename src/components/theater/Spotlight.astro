@@ -1,0 +1,40 @@
+---
+/**
+ * REFLECTOR — el haz que sigue al cursor.
+ *
+ * Vive en el TELON DE FONDO, por detras de todo el contenido. Es una decision
+ * de accesibilidad, no de estilo: una capa translucida por ENCIMA del texto
+ * altera su contraste y puede tumbar el criterio 1.4.3 de WCAG. Iluminando
+ * solo el fondo, el efecto se nota y el contraste del texto queda intacto.
+ *
+ * Las coordenadas las escribe `utils/motion.ts` como custom properties,
+ * asi que el navegador solo repinta un degradado: nada de layout.
+ */
+---
+
+<div class="spotlight" data-spotlight aria-hidden="true"></div>
+
+<style>
+  .spotlight {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 500ms var(--ease-soft);
+    background: radial-gradient(
+      var(--spotlight-size) circle at var(--pointer-x, 50%) var(--pointer-y, 25%),
+      var(--spotlight),
+      transparent 68%
+    );
+  }
+
+  .spotlight.is-lit {
+    opacity: 1;
+  }
+
+  /* En tactil no hay cursor al que seguir: ni se pinta ni se escucha nada. */
+  @media (pointer: coarse) {
+    .spotlight {
+      display: none;
+    }
+  }
+</style>

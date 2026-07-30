@@ -1,0 +1,168 @@
+---
+/**
+ * TELON DE FONDO — la atmosfera de la sala.
+ *
+ * Todo lo que hay aqui es decorativo y todo se pinta con degradados y
+ * `transform`. Ni un solo `filter: blur()` animado, ni un `box-shadow` en
+ * bucle: son las dos formas mas rapidas de tirar un portfolio a 30 fps.
+ *
+ * `contain: strict` en las capas aisla su repintado del resto del documento.
+ */
+import { theater } from '@data/theater.config';
+
+const MOTE_COUNT = 14;
+
+/**
+ * Posiciones deterministas: una secuencia pseudoaleatoria con semilla fija.
+ * Se calcula en build, es identica en cada compilacion y no cuesta JS.
+ */
+const motes = Array.from({ length: MOTE_COUNT }, (_, index) => {
+  const seed = (index * 2654435761) % 1000;
+  return {
+    left: `${(seed % 97) + 1.5}%`,
+    top: `${((seed * 7) % 88) + 6}%`,
+    size: `${1 + (seed % 3)}px`,
+    delay: `${-(seed % 12)}s`,
+    duration: `${11 + (seed % 9)}s`,
+    opacity: 0.18 + (seed % 5) / 14,
+  };
+});
+---
+
+<div class="backdrop" aria-hidden="true">
+  <div class="backdrop__wash"></div>
+
+  <div class="backdrop__lights" data-parallax="0.18">
+    <div class="backdrop__beam backdrop__beam--left"></div>
+    <div class="backdrop__beam backdrop__beam--right"></div>
+  </div>
+
+  {
+    theater.ambience.dustMotes && (
+      <div class="backdrop__motes">
+        {motes.map((mote) => (
+          <span
+            class="mote"
+            style={`left:${mote.left};top:${mote.top};width:${mote.size};height:${mote.size};animation-delay:${mote.delay};animation-duration:${mote.duration};--mote-opacity:${mote.opacity}`}
+          ></span>
+        ))}
+      </div>
+    )
+  }
+
+  {theater.ambience.footlights && <div class="backdrop__footlights"></div>}
+</div>
+
+<style>
+  .backdrop {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background-color: var(--bg);
+  }
+
+  /* Base: dos focos altos y un suelo mas oscuro. Estatico, coste cero. */
+  .backdrop__wash {
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(120% 70% at 50% -10%, var(--halo) 0%, transparent 55%),
+      radial-gradient(80% 50% at 0% 100%, var(--footlight) 0%, transparent 60%),
+      linear-gradient(180deg, transparent 55%, var(--bg-deep) 100%);
+    opacity: 0.85;
+  }
+
+  .backdrop__lights {
+    position: absolute;
+    inset: -12% -5% 0;
+    contain: strict;
+  }
+
+  /* Haces de sala: conos de luz muy tenues que respiran despacio. */
+  .backdrop__beam {
+    position: absolute;
+    top: -30%;
+    width: 46vmax;
+    height: 120vmax;
+    background: linear-gradient(180deg, var(--halo) 0%, transparent 62%);
+    clip-path: polygon(42% 0%, 58% 0%, 100% 100%, 0% 100%);
+    opacity: 0.4;
+    animation: beam-breathe 14s var(--ease-soft) infinite alternate;
+  }
+
+  .backdrop__beam--left {
+    left: -8%;
+    rotate: 14deg;
+    transform-origin: top center;
+  }
+
+  .backdrop__beam--right {
+    right: -8%;
+    rotate: -14deg;
+    transform-origin: top center;
+    animation-delay: -7s;
+  }
+
+  .backdrop__motes {
+    position: absolute;
+    inset: 0;
+    contain: strict;
+  }
+
+  .mote {
+    position: absolute;
+    display: block;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0;
+    animation-name: mote-float;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+
+  .backdrop__footlights {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: clamp(90px, 14vh, 180px);
+    background: linear-gradient(0deg, var(--footlight) 0%, transparent 100%);
+    opacity: 0.7;
+  }
+
+  @keyframes beam-breathe {
+    from {
+      opacity: 0.24;
+      transform: scaleY(0.94);
+    }
+    to {
+      opacity: 0.5;
+      transform: scaleY(1.06);
+    }
+  }
+
+  @keyframes mote-float {
+    0% {
+      opacity: 0;
+      transform: translate3d(0, 12px, 0);
+    }
+    18%,
+    72% {
+      opacity: var(--mote-opacity, 0.25);
+    }
+    100% {
+      opacity: 0;
+      transform: translate3d(6px, -46px, 0);
+    }
+  }
+
+  /* Sin movimiento: la atmosfera se queda, pero quieta. */
+  @media (prefers-reduced-motion: reduce) {
+    .backdrop__beam,
+    .mote {
+      animation: none;
+    }
+    .mote {
+      opacity: var(--mote-opacity, 0.25);
+    }
+  }
+</style>

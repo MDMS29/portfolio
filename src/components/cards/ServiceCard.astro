@@ -1,0 +1,125 @@
+---
+/**
+ * TARJETA DE SERVICIO.
+ *
+ * `highlighted` marca el servicio principal. La diferencia se comunica con
+ * un rotulo textual ("Servicio principal") ademas del borde dorado: quien no
+ * distingue el color tambien tiene que enterarse.
+ */
+import { Icon } from 'astro-icon/components';
+import Card from '@components/ui/Card.astro';
+import type { ServiceEntry } from '@utils/collections';
+import { cn } from '@utils/cn';
+
+interface Props {
+  service: ServiceEntry;
+  class?: string;
+}
+
+const { service, class: className } = Astro.props;
+const { title, icon, summary, deliverables, highlighted } = service.data;
+---
+
+<Card
+  as="article"
+  interactive
+  padding="lg"
+  class={cn('service', highlighted && 'service--highlighted', className)}
+  data-reveal="rise"
+>
+  {highlighted && <p class="service__flag">Servicio principal</p>}
+
+  <span class="service__icon" aria-hidden="true">
+    <Icon name={icon} />
+  </span>
+
+  <h3 class="service__title">{title}</h3>
+  <p class="service__summary">{summary}</p>
+
+  <ul class="service__list">
+    {
+      deliverables.map((item) => (
+        <li>
+          <Icon name="lucide:check" aria-hidden="true" />
+          <span>{item}</span>
+        </li>
+      ))
+    }
+  </ul>
+</Card>
+
+<style>
+  .service {
+    height: 100%;
+  }
+
+  .service--highlighted {
+    border-color: color-mix(in oklab, var(--accent) 55%, var(--border));
+  }
+
+  .service__flag {
+    display: inline-block;
+    margin: 0 0 0.9rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .service__icon {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-bottom: 1.1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-raised);
+    color: var(--accent);
+  }
+
+  .service__icon :global(svg) {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+
+  .service__title {
+    margin: 0;
+    font-size: var(--text-xl);
+  }
+
+  .service__summary {
+    margin: 0.6rem 0 0;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+
+  .service__list {
+    display: grid;
+    gap: 0.5rem;
+    margin: 1.15rem 0 0;
+    padding: 1.1rem 0 0;
+    border-top: 1px solid var(--border);
+    list-style: none;
+  }
+
+  .service__list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+
+  .service__list :global(svg) {
+    width: 1rem;
+    height: 1rem;
+    margin-top: 0.28em;
+    flex: none;
+    color: var(--accent);
+  }
+</style>

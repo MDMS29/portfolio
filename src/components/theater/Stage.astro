@@ -1,0 +1,95 @@
+---
+/**
+ * ESCENARIO — el marco de boca (proscenio) que enmarca una escena destacada.
+ *
+ * Lo usan el hero y la cabecera de cada caso de estudio. Todo el adorno se
+ * dibuja con pseudo-elementos y degradados sobre un contenedor vacio, para
+ * que el marcado siga siendo semanticamente limpio: un `<div>` decorativo y
+ * el contenido real dentro.
+ */
+import { cn } from '@utils/cn';
+
+interface Props {
+  /** `full` ocupa el alto de la ventana; `panel` se ajusta al contenido. */
+  size?: 'full' | 'panel';
+  /** Tine el escenario con el color del proyecto. */
+  accent?: string;
+  class?: string;
+}
+
+const { size = 'panel', accent, class: className } = Astro.props;
+const style = accent ? `--stage-accent:${accent}` : undefined;
+---
+
+<div class={cn('stage', `stage--${size}`, className)} style={style}>
+  <div class="stage__floor" aria-hidden="true"></div>
+  <div class="stage__content">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .stage {
+    position: relative;
+    --stage-accent: var(--accent);
+  }
+
+  .stage--full {
+    display: flex;
+    align-items: center;
+    min-height: calc(100dvh - var(--nav-h));
+    padding-block: clamp(3rem, 8vh, 6rem);
+  }
+
+  /* Arco de proscenio: dos molduras verticales que insinuan la boca escenica.
+     Solo se dibujan cuando hay sitio; en movil serian ruido. */
+  .stage::before,
+  .stage::after {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    width: 1px;
+    background: linear-gradient(
+      180deg,
+      transparent,
+      color-mix(in oklab, var(--stage-accent) 45%, transparent) 30%,
+      color-mix(in oklab, var(--stage-accent) 45%, transparent) 70%,
+      transparent
+    );
+    opacity: 0;
+  }
+
+  .stage::before {
+    left: 0;
+  }
+
+  .stage::after {
+    right: 0;
+  }
+
+  /* Tablas del escenario: una elipse de luz en el suelo. */
+  .stage__floor {
+    position: absolute;
+    inset-inline: 10%;
+    bottom: 0;
+    height: 45%;
+    background: radial-gradient(
+      60% 100% at 50% 100%,
+      color-mix(in oklab, var(--stage-accent) 22%, transparent),
+      transparent 70%
+    );
+    pointer-events: none;
+  }
+
+  .stage__content {
+    position: relative;
+    width: 100%;
+  }
+
+  @media (min-width: 64rem) {
+    .stage::before,
+    .stage::after {
+      opacity: 0.7;
+    }
+  }
+</style>

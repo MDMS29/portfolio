@@ -1,0 +1,155 @@
+---
+/**
+ * TELON — la apertura de la funcion.
+ *
+ * Se abre con una animacion CSS PURA que arranca sola. Es deliberado:
+ * si el telon dependiera de JavaScript para retirarse, un fallo de red
+ * dejaria la pagina tapada para siempre. Aqui, sin JS, el telon se abre igual.
+ *
+ * El "solo una vez por sesion" lo decide el script inline del <head>, que se
+ * ejecuta ANTES del primer pintado y marca <html data-curtain="skip">.
+ * Comprobarlo mas tarde produciria un parpadeo del telon en cada navegacion.
+ */
+import { theater } from '@data/theater.config';
+
+interface Props {
+  /** Texto del cartel que se ve un instante antes de abrir. */
+  title?: string;
+}
+
+const { title } = Astro.props;
+const duration = `${theater.curtain.duration}ms`;
+---
+
+{
+  theater.curtain.enabled && (
+    <div class="curtain" data-curtain aria-hidden="true">
+      <div class="curtain__panel curtain__panel--left"></div>
+      <div class="curtain__panel curtain__panel--right"></div>
+      {title && (
+        <p class="curtain__plate">
+          <span class="curtain__plate-rule"></span>
+          <span class="curtain__plate-text">{title}</span>
+          <span class="curtain__plate-rule"></span>
+        </p>
+      )}
+    </div>
+  )
+}
+
+<style define:vars={{ duration }}>
+  .curtain {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-curtain);
+    /* Decorativo de principio a fin: jamas intercepta un clic. */
+    pointer-events: none;
+    /* Se retira del arbol de pintado al terminar, sin necesidad de JS. */
+    animation: curtain-clear 1ms linear var(--duration) forwards;
+  }
+
+  .curtain__panel {
+    position: absolute;
+    inset-block: 0;
+    width: 51%;
+    background:
+      repeating-linear-gradient(
+        90deg,
+        rgb(0 0 0 / 0.28) 0 2px,
+        transparent 2px 14px,
+        rgb(255 255 255 / 0.06) 14px 16px,
+        transparent 16px 34px
+      ),
+      linear-gradient(180deg, var(--curtain-deep) 0%, var(--curtain) 45%, var(--curtain-deep) 100%);
+    box-shadow: inset 0 0 120px rgb(0 0 0 / 0.55);
+    animation: var(--duration) var(--ease-curtain) forwards;
+  }
+
+  .curtain__panel--left {
+    left: 0;
+    animation-name: curtain-part-left;
+  }
+
+  .curtain__panel--right {
+    right: 0;
+    animation-name: curtain-part-right;
+  }
+
+  .curtain__plate {
+    position: absolute;
+    inset-inline: 0;
+    top: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    translate: 0 -50%;
+    margin: 0;
+    padding-inline: var(--gutter);
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--brass-200);
+    animation: curtain-plate calc(var(--duration) * 0.75) var(--ease-soft) forwards;
+  }
+
+  .curtain__plate-rule {
+    width: clamp(1.5rem, 8vw, 5rem);
+    height: 1px;
+    background: currentColor;
+    opacity: 0.5;
+  }
+
+  @keyframes curtain-part-left {
+    0%,
+    22% {
+      transform: translate3d(0, 0, 0);
+    }
+    100% {
+      transform: translate3d(-100.5%, 0, 0);
+    }
+  }
+
+  @keyframes curtain-part-right {
+    0%,
+    22% {
+      transform: translate3d(0, 0, 0);
+    }
+    100% {
+      transform: translate3d(100.5%, 0, 0);
+    }
+  }
+
+  @keyframes curtain-plate {
+    0% {
+      opacity: 0;
+    }
+    18%,
+    42% {
+      opacity: 1;
+    }
+    70%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes curtain-clear {
+    to {
+      visibility: hidden;
+    }
+  }
+
+  /* Visita repetida en la misma sesion: la obra ya empezo. */
+  :global(html[data-curtain='skip']) .curtain {
+    display: none;
+  }
+
+  /* Sin movimiento no hay apertura: no se dibuja el telon en absoluto. */
+  @media (prefers-reduced-motion: reduce) {
+    .curtain {
+      display: none;
+    }
+  }
+</style>

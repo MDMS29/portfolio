@@ -1,0 +1,177 @@
+---
+/**
+ * TARJETA DE CERTIFICACION — los galardones.
+ *
+ * Si hay credencial verificable, la tarjeta entera enlaza a ella con el
+ * patron de enlace extendido; si no, es una tarjeta estatica. No se simula
+ * interactividad donde no hay destino.
+ */
+import { Icon } from 'astro-icon/components';
+import Card from '@components/ui/Card.astro';
+import type { CertificationEntry } from '@utils/collections';
+import { formatMonth, toDateTimeAttr } from '@utils/format';
+import { cn } from '@utils/cn';
+
+interface Props {
+  certification: CertificationEntry;
+  class?: string;
+}
+
+const { certification, class: className } = Astro.props;
+const { title, issuer, issuerIcon, date, credentialId, url, skills } = certification.data;
+---
+
+<Card
+  as="article"
+  interactive={Boolean(url)}
+  padding="md"
+  class={cn('cert', className)}
+  data-reveal="rise"
+>
+  <div class="cert__head">
+    <span class="cert__seal" aria-hidden="true">
+      <Icon name={issuerIcon} />
+    </span>
+    <time class="cert__date" datetime={toDateTimeAttr(date)}>{formatMonth(date)}</time>
+  </div>
+
+  <h3 class="cert__title">
+    {
+      url ? (
+        <a
+          class="cert__link"
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Verificar la credencial ${title} de ${issuer} (se abre en una pestaña nueva)`}
+        >
+          {title}
+        </a>
+      ) : (
+        title
+      )
+    }
+  </h3>
+
+  <p class="cert__issuer">{issuer}</p>
+
+  <ul class="cert__skills">
+    {skills.map((skill) => <li>{skill}</li>)}
+  </ul>
+
+  {
+    credentialId && (
+      <p class="cert__credential">
+        <Icon name="lucide:badge-check" aria-hidden="true" />
+        <span class="sr-only-focusable">Identificador de credencial: </span>
+        <code>{credentialId}</code>
+      </p>
+    )
+  }
+</Card>
+
+<style>
+  .cert {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cert__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .cert__seal {
+    display: grid;
+    place-items: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: var(--radius-sm);
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  .cert__seal :global(svg) {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  .cert__date {
+    font-size: var(--text-2xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+  }
+
+  .cert__title {
+    margin: 0;
+    font-size: var(--text-lg);
+    line-height: 1.25;
+  }
+
+  .cert__link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .cert__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  .cert__link:hover {
+    color: var(--accent);
+  }
+
+  .cert__issuer {
+    margin: 0.35rem 0 0;
+    font-size: var(--text-sm);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .cert__skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin: 0.9rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .cert__skills li {
+    padding: 0.2rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 0.68rem;
+    color: var(--text-subtle);
+  }
+
+  .cert__credential {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: auto 0 0;
+    padding-top: 1rem;
+    font-size: var(--text-2xs);
+    color: var(--text-subtle);
+  }
+
+  .cert__credential :global(svg) {
+    width: 0.9rem;
+    height: 0.9rem;
+    color: var(--accent);
+  }
+
+  .cert__credential code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: 0.04em;
+  }
+</style>

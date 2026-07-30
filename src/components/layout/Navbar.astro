@@ -1,0 +1,409 @@
+---
+/**
+ * BARRA SUPERIOR — el programa de mano, siempre a mano.
+ *
+ * Tres decisiones que merecen explicacion:
+ *
+ * 1. Los enlaces se generan desde `ACTS`: anadir una seccion nunca obliga a
+ *    tocar este archivo.
+ * 2. El estado "acto en curso" lo pone `utils/motion.ts` con un
+ *    IntersectionObserver y lo comunica con `aria-current`, no solo con color.
+ * 3. El menu movil usa delegacion de eventos en `document`. Con View
+ *    Transitions el DOM se reemplaza, y un listener atado al boton concreto
+ *    moriria en la primera navegacion.
+ */
+import { Icon } from 'astro-icon/components';
+import { NAV_ACTS } from '@data/navigation';
+import { SITE } from '@data/site';
+import ThemeToggle from './ThemeToggle.astro';
+import SocialLinks from '@components/ui/SocialLinks.astro';
+
+const isHome = Astro.url.pathname === '/';
+const anchor = (id: string): string => (isHome ? `#${id}` : `/#${id}`);
+const initials = SITE.author.name
+  .split(' ')
+  .map((word) => word[0])
+  .join('');
+---
+
+<header class="header" data-site-header>
+  <div class="stage-container header__inner">
+    <a class="brand" href="/" aria-label={`${SITE.author.name} — volver al inicio`}>
+      <span class="brand__mark" aria-hidden="true">{initials}</span>
+      <span class="brand__text">
+        <span class="brand__name">{SITE.author.name}</span>
+        <span class="brand__role">{SITE.author.role}</span>
+      </span>
+    </a>
+
+    <nav class="nav" aria-label="Actos de la obra">
+      <ul class="nav__list">
+        {
+          NAV_ACTS.map((act) => (
+            <li>
+              <a class="nav__link" href={anchor(act.id)} data-act-link={act.id}>
+                <span class="nav__act">{act.act}</span>
+                <span class="nav__label">{act.label}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="header__actions">
+      <ThemeToggle />
+      <button
+        type="button"
+        class="menu-button"
+        data-menu-toggle
+        aria-expanded="false"
+        aria-controls="menu-actos"
+        aria-label="Abrir el programa de mano"
+      >
+        <Icon name="lucide:menu" class="menu-button__icon menu-button__icon--open" aria-hidden="true" />
+        <Icon name="lucide:x" class="menu-button__icon menu-button__icon--close" aria-hidden="true" />
+      </button>
+    </div>
+  </div>
+
+  <div class="drawer" id="menu-actos" data-menu-panel hidden>
+    <nav class="drawer__nav" aria-label="Actos de la obra (móvil)">
+      <ul class="drawer__list">
+        {
+          NAV_ACTS.map((act, index) => (
+            <li>
+              <a class="drawer__link" href={anchor(act.id)} data-menu-link>
+                <span class="drawer__index">{String(index + 1).padStart(2, '0')}</span>
+                <span class="drawer__label">{act.label}</span>
+                <span class="drawer__act">{act.act}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <div class="drawer__footer">
+      <SocialLinks size="sm" label="Perfiles" />
+    </div>
+  </div>
+</header>
+
+<script>
+  const OPEN_CLASS = 'menu-open';
+
+  function panel(): HTMLElement | null {
+    return document.querySelector<HTMLElement>('[data-menu-panel]');
+  }
+
+  function toggleButton(): HTMLButtonElement | null {
+    return document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  }
+
+  function setMenu(open: boolean): void {
+    const drawer = panel();
+    const button = toggleButton();
+    if (!drawer || !button) return;
+
+    drawer.hidden = !open;
+    button.setAttribute('aria-expanded', String(open));
+    button.setAttribute(
+      'aria-label',
+      open ? 'Cerrar el programa de mano' : 'Abrir el programa de mano'
+    );
+    // Bloquea el scroll del fondo mientras el cajon esta abierto.
+    document.documentElement.classList.toggle(OPEN_CLASS, open);
+  }
+
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    if (target.closest('[data-menu-toggle]')) {
+      const expanded = toggleButton()?.getAttribute('aria-expanded') === 'true';
+      setMenu(!expanded);
+      return;
+    }
+
+    // Navegar cierra el cajon; hacerlo fuera de el, tambien.
+    if (target.closest('[data-menu-link]')) {
+      setMenu(false);
+      return;
+    }
+
+    if (document.documentElement.classList.contains(OPEN_CLASS) && !target.closest('[data-menu-panel]')) {
+      setMenu(false);
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    if (!document.documentElement.classList.contains(OPEN_CLASS)) return;
+    setMenu(false);
+    toggleButton()?.focus();
+  });
+
+  // Al pasar a escritorio el cajon deja de tener sentido: se cierra solo.
+  const desktop = window.matchMedia('(min-width: 64rem)');
+  desktop.addEventListener('change', (event) => {
+    if (event.matches) setMenu(false);
+  });
+
+  // Tras una View Transition el cajon nunca debe quedar abierto.
+  document.addEventListener('astro:after-swap', () => setMenu(false));
+</script>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-nav);
+    background: color-mix(in oklab, var(--bg) 78%, transparent);
+    border-bottom: 1px solid transparent;
+    transition:
+      background-color var(--dur-base) var(--ease-soft),
+      border-color var(--dur-base) var(--ease-soft),
+      backdrop-filter var(--dur-base) var(--ease-soft);
+  }
+
+  /* El desenfoque solo aparece al desplazarse: evita el coste de compositar
+     una capa borrosa durante el primer pintado, que es el que Lighthouse mide. */
+  .header.is-scrolled {
+    background: color-mix(in oklab, var(--bg) 88%, transparent);
+    backdrop-filter: saturate(150%) blur(12px);
+    border-bottom-color: var(--border);
+  }
+
+  .header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: var(--nav-h);
+  }
+
+  /* -------------------------------------------------- marca */
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    text-decoration: none;
+    flex: none;
+  }
+
+  .brand__mark {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--radius-sm);
+    background: linear-gradient(140deg, var(--accent), var(--curtain));
+    color: var(--accent-contrast);
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    box-shadow: var(--elev-1);
+  }
+
+  .brand__text {
+    display: none;
+    flex-direction: column;
+    line-height: 1.15;
+  }
+
+  .brand__name {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .brand__role {
+    font-size: var(--text-2xs);
+    color: var(--text-subtle);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* -------------------------------------------------- navegacion */
+  .nav {
+    display: none;
+  }
+
+  .nav__list {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nav__link {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    text-decoration: none;
+    color: var(--text-muted);
+    transition: color var(--dur-fast) var(--ease-soft);
+  }
+
+  .nav__act {
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+    transition: color var(--dur-fast) var(--ease-soft);
+  }
+
+  .nav__link:hover,
+  .nav__link.is-current {
+    color: var(--accent);
+  }
+
+  .nav__link:hover .nav__act,
+  .nav__link.is-current .nav__act {
+    color: var(--accent);
+  }
+
+  /* Reflector bajo el acto en curso. Se anima solo la escala: cero layout. */
+  .nav__link::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0.7rem;
+    bottom: 0.1rem;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform var(--dur-base) var(--ease-scene);
+  }
+
+  .nav__link.is-current::after {
+    transform: scaleX(1);
+  }
+
+  .header__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: none;
+  }
+
+  /* -------------------------------------------------- cajon movil */
+  .menu-button {
+    display: grid;
+    place-items: center;
+    grid-template-areas: 'icon';
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+
+  .menu-button__icon {
+    grid-area: icon;
+    width: 1.15rem;
+    height: 1.15rem;
+    transition:
+      opacity var(--dur-fast) var(--ease-soft),
+      rotate var(--dur-fast) var(--ease-soft);
+  }
+
+  .menu-button__icon--close {
+    opacity: 0;
+    rotate: -90deg;
+  }
+
+  .menu-button[aria-expanded='true'] .menu-button__icon--open {
+    opacity: 0;
+    rotate: 90deg;
+  }
+
+  .menu-button[aria-expanded='true'] .menu-button__icon--close {
+    opacity: 1;
+    rotate: 0deg;
+  }
+
+  .drawer {
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    box-shadow: var(--elev-3);
+    max-height: calc(100dvh - var(--nav-h));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .drawer__list {
+    margin: 0;
+    padding: 0.5rem var(--gutter) 0;
+    list-style: none;
+  }
+
+  .drawer__link {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: baseline;
+    gap: 0.85rem;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text);
+  }
+
+  .drawer__index {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    color: var(--accent);
+  }
+
+  .drawer__label {
+    font-size: var(--text-lg);
+    font-family: var(--font-display);
+  }
+
+  .drawer__act {
+    font-size: var(--text-2xs);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+  }
+
+  .drawer__footer {
+    padding: 1rem var(--gutter) 1.25rem;
+  }
+
+  /* -------------------------------------------------- adaptativo */
+  @media (min-width: 40rem) {
+    .brand__text {
+      display: flex;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .nav {
+      display: block;
+    }
+
+    .menu-button {
+      display: none;
+    }
+
+    .drawer {
+      display: none;
+    }
+  }
+
+  :global(html.menu-open) {
+    overflow: hidden;
+  }
+</style>

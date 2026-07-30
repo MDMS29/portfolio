@@ -1,0 +1,208 @@
+---
+/**
+ * BOTON — una sola implementacion para enlaces y botones.
+ *
+ * Regla que evita el error de accesibilidad mas comun del sistema: si hay
+ * `href`, se renderiza un `<a>`; si no, un `<button>`. Nunca un `<div>` con
+ * un manejador de clic. El elemento correcto trae gratis el foco, el rol,
+ * la activacion con Enter/Espacio y el menu contextual del navegador.
+ *
+ * Microinteraccion: un destello que barre el boton al pasar por encima. Se
+ * anima con `transform`, se dibuja en un pseudo-elemento y desaparece con
+ * `prefers-reduced-motion`.
+ */
+import { Icon } from 'astro-icon/components';
+import { cn } from '@utils/cn';
+import type { HTMLAttributes } from 'astro/types';
+
+type Variant = 'primary' | 'secondary' | 'ghost' | 'link';
+type Size = 'sm' | 'md' | 'lg';
+
+interface Props extends Omit<HTMLAttributes<'a'>, 'size'> {
+  variant?: Variant;
+  size?: Size;
+  href?: string;
+  /** Solo se aplica cuando no hay href. */
+  type?: 'button' | 'submit' | 'reset';
+  /** Icono Iconify a la izquierda o a la derecha del texto. */
+  iconStart?: string;
+  iconEnd?: string;
+  /** Ocupa todo el ancho disponible. */
+  block?: boolean;
+  class?: string;
+}
+
+const {
+  variant = 'primary',
+  size = 'md',
+  href,
+  type = 'button',
+  iconStart,
+  iconEnd,
+  block = false,
+  class: className,
+  ...rest
+} = Astro.props;
+
+const Tag = href ? 'a' : 'button';
+
+// Los enlaces externos avisan de que abren otra pestana y se blindan
+// contra el acceso a `window.opener`.
+const external = Boolean(href?.startsWith('http'));
+const externalAttrs = external ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+const tagAttrs = href ? { href, ...externalAttrs } : { type };
+---
+
+<Tag class={cn('btn', `btn--${variant}`, `btn--${size}`, block && 'btn--block', className)} {...tagAttrs} {...rest}>
+  {iconStart && <Icon name={iconStart} class="btn__icon" aria-hidden="true" />}
+  <span class="btn__label"><slot /></span>
+  {iconEnd && <Icon name={iconEnd} class="btn__icon btn__icon--end" aria-hidden="true" />}
+  {external && <span class="sr-only-focusable"> (se abre en una pestaña nueva)</span>}
+</Tag>
+
+<style>
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    overflow: hidden;
+    transition:
+      transform var(--dur-fast) var(--ease-out-back),
+      background-color var(--dur-fast) var(--ease-soft),
+      border-color var(--dur-fast) var(--ease-soft),
+      color var(--dur-fast) var(--ease-soft),
+      box-shadow var(--dur-fast) var(--ease-soft);
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+  }
+
+  .btn:active {
+    transform: translateY(0);
+  }
+
+  /* Destello de reflector al pasar por encima. */
+  .btn::after {
+    content: '';
+    position: absolute;
+    inset-block: -50%;
+    left: 0;
+    width: 35%;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.35), transparent);
+    transform: translate3d(-220%, 0, 0) skewX(-18deg);
+    pointer-events: none;
+  }
+
+  .btn:hover::after {
+    animation: theater-sweep 780ms var(--ease-soft);
+  }
+
+  /* ------------------------------------------------------- variantes */
+  .btn--primary {
+    background: var(--accent);
+    color: var(--accent-contrast);
+    box-shadow: var(--elev-1);
+  }
+
+  .btn--primary:hover {
+    background: var(--accent-strong);
+    box-shadow: var(--glow);
+  }
+
+  .btn--secondary {
+    background: var(--surface);
+    border-color: var(--border-strong);
+    color: var(--text);
+  }
+
+  .btn--secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .btn--ghost {
+    background: transparent;
+    color: var(--text-muted);
+  }
+
+  .btn--ghost:hover {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .btn--link {
+    padding: 0;
+    background: none;
+    color: var(--accent);
+    overflow: visible;
+  }
+
+  .btn--link::after {
+    display: none;
+  }
+
+  .btn--link:hover {
+    text-decoration: underline;
+    transform: none;
+  }
+
+  .btn--link .btn__icon--end {
+    transition: transform var(--dur-fast) var(--ease-out-back);
+  }
+
+  .btn--link:hover .btn__icon--end {
+    transform: translateX(3px);
+  }
+
+  /* ------------------------------------------------------- tamanos */
+  .btn--sm {
+    padding: 0.5rem 0.85rem;
+    font-size: var(--text-xs);
+  }
+
+  .btn--md {
+    padding: 0.75rem 1.25rem;
+    font-size: var(--text-sm);
+  }
+
+  .btn--lg {
+    padding: 0.95rem 1.75rem;
+    font-size: var(--text-base);
+  }
+
+  .btn--link.btn--sm,
+  .btn--link.btn--md,
+  .btn--link.btn--lg {
+    padding: 0;
+  }
+
+  .btn--block {
+    width: 100%;
+  }
+
+  .btn__icon {
+    width: 1.05em;
+    height: 1.05em;
+    flex: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn:hover {
+      transform: none;
+    }
+    .btn:hover::after {
+      animation: none;
+    }
+  }
+</style>

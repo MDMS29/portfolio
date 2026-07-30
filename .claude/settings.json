@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(node --version)",
+      "PowerShell(npm --version)",
+      "PowerShell(npm view astro version)",
+      "PowerShell(npm view tailwindcss version)",
+      "PowerShell(npm view motion version)",
+      "PowerShell(npm view astro-icon version)",
+      "PowerShell(npm view @astrojs/sitemap version)",
+      "WebFetch(domain:docs.astro.build)",
+      "PowerShell(npm view astro-icon peerDependencies)",
+      "PowerShell(npm view @astrojs/sitemap peerDependencies)",
+      "PowerShell(npm view @tailwindcss/vite version)",
+      "PowerShell(npm view @fontsource-variable/playfair-display version)",
+      "PowerShell(npm view @fontsource-variable/inter version)",
+      "PowerShell(npm view @iconify-json/lucide version)",
+      "PowerShell(npm view @iconify-json/simple-icons version)",
+      "PowerShell(npm install --no-audit --no-fund 2>&1)",
+      "PowerShell(\"=== PLAYFAIR ===\")",
+      "PowerShell($z = \"c:\\\\Users\\\\USER\\\\Documents\\\\WorkSpace\\\\PERSONAL\\\\portfolio\\\\node_modules\\\\zod\\\\package.json\"; if \\(Test-Path $z\\) { \\(Get-Content $z | ConvertFrom-Json\\).version } else { \"zod no es dep directa\" }; Get-ChildItem \"c:\\\\Users\\\\USER\\\\Documents\\\\WorkSpace\\\\PERSONAL\\\\portfolio\\\\node_modules\\\\astro\\\\node_modules\" -Directory -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name)",
+      "PowerShell(\"---\")",
+      "PowerShell(npx astro build 2>&1)",
+      "Bash(awk '{print $5\" bytes\"}')",
+      "Bash(awk '{print $9, $5}')",
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\(Object.keys\\(p.exports\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(node -e \"import\\('./dist/es/mini.mjs'\\).then\\(m=>console.log\\(Object.keys\\(m\\).join\\(', '\\)\\)\\)\")",
+      "Bash(node -e \"import\\('./dist/es/index.mjs'\\).then\\(m=>console.log\\(Object.keys\\(m\\).filter\\(k=>/scroll|inView|animate|stagger|hover|press/i.test\\(k\\)\\).join\\(', '\\)\\)\\)\")",
+      "Bash(npx --no-install playwright --version)",
+      "Read(//c/Users/USER/AppData/Local/**)",
+      "Read(//c/Program Files/Google/Chrome/Application/**)",
+      "Read(//c/Program Files \\\\\\(x86\\\\\\)/Microsoft/Edge/Application/**)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:4321/)",
+      "Bash(SHOT=\"/c/Users/USER/AppData/Local/Temp/claude/c--Users-USER-Documents-WorkSpace-PERSONAL-portfolio/b8a00772-367b-42f0-8f5a-b15df70996c9/scratchpad\"; ls -la \"$SHOT\" 2>&1 | head -20)",
+      "Read(//c/Users/USER/AppData/Local/Temp/claude/c--Users-USER-Documents-WorkSpace-PERSONAL-portfolio/b8a00772-367b-42f0-8f5a-b15df70996c9/scratchpad/**)",
+      "Bash(\"/c/Program Files \\(x86\\)/Microsoft/Edge/Application/msedge.exe\" --headless=new --disable-gpu --no-sandbox --hide-scrollbars --remote-debugging-port=9222 --user-data-dir=\"C:\\\\\\\\Users\\\\\\\\USER\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\claude\\\\\\\\edge-cdp-profile\" about:blank)",
+      "Bash(curl -s http://127.0.0.1:9222/json/version)",
+      "Bash(node shot.mjs \"http://localhost:4321/\" \"02-home-dark.png\" 1440 950 dark)"
+    ]
+  }
+}

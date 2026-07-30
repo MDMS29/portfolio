@@ -1,0 +1,46 @@
+---
+/**
+ * ACTO VI — los galardones.
+ * Orden cronologico inverso, resuelto en `utils/collections`.
+ */
+import Section from '@components/ui/Section.astro';
+import CertificationCard from '@components/cards/CertificationCard.astro';
+import { getCertifications } from '@utils/collections';
+
+const certifications = await getCertifications();
+---
+
+<Section
+  id="certificaciones"
+  tone="sunken"
+  lead="Formación acreditada. Ninguna sustituye a haber roto algo en producción, pero ayudan a ponerle nombre a lo que ya se hacía por instinto."
+>
+  <ul class="certs" data-reveal-stagger="70">
+    {
+      certifications.map((certification) => (
+        <li class="certs__cell">
+          <CertificationCard certification={certification} />
+        </li>
+      ))
+    }
+  </ul>
+</Section>
+
+<style>
+  .certs {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  }
+
+  .certs__cell {
+    display: flex;
+  }
+
+  .certs__cell > :global(*) {
+    width: 100%;
+  }
+</style>

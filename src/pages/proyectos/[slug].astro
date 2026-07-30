@@ -1,0 +1,435 @@
+---
+/**
+ * PROGRAMA DE MANO — el caso de estudio de una obra.
+ *
+ * Aqui las View Transitions ganan su sitio: el cartel y el titulo comparten
+ * `transition:name` con la tarjeta de la portada, de modo que al abrir el
+ * proyecto la imagen CRECE hasta su nueva posicion en lugar de parpadear.
+ * La sensacion es la de un cambio de escena, no la de una recarga.
+ *
+ * `getStaticPaths` prerenderiza una pagina por proyecto en build: cero
+ * servidor, cero base de datos, HTML puro servido desde el CDN.
+ */
+import { Icon } from 'astro-icon/components';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Stage from '@components/theater/Stage.astro';
+import Card from '@components/ui/Card.astro';
+import Button from '@components/ui/Button.astro';
+import TechBadge from '@components/ui/TechBadge.astro';
+import ProjectPoster from '@components/cards/ProjectPoster.astro';
+import { getProjects, getTechMap, resolveTech, getProjectNeighbours } from '@utils/collections';
+import { projectSchema, breadcrumbSchema } from '@utils/seo';
+
+export async function getStaticPaths() {
+  const projects = await getProjects();
+  return projects.map((project, index) => ({
+    params: { slug: project.id },
+    props: { project, index },
+  }));
+}
+
+const { project, index } = Astro.props;
+const { title, tagline, year, role, status, accent, tags, links, metrics, story } = project.data;
+
+const [techMap, neighbours] = await Promise.all([getTechMap(), getProjectNeighbours(project.id)]);
+const stack = resolveTech(techMap, project.data.stack);
+
+const STATUS_LABEL: Record<typeof status, string> = {
+  produccion: 'En producción',
+  beta: 'En beta',
+  archivado: 'Archivado',
+};
+
+// El caso de estudio siempre tiene las mismas cuatro escenas: es lo que hace
+// comparables unos proyectos con otros.
+const scenes = [
+  { key: 'challenge', act: 'El nudo', title: 'El problema', body: story.challenge },
+  { key: 'solution', act: 'El desarrollo', title: 'Qué construí', body: story.solution },
+  { key: 'outcome', act: 'El desenlace', title: 'Qué cambió', body: story.outcome },
+];
+
+const jsonLd = [
+  projectSchema(project),
+  breadcrumbSchema([
+    { name: 'Inicio', path: '/' },
+    { name: 'Proyectos', path: '/#proyectos' },
+    { name: title, path: `/proyectos/${project.id}` },
+  ]),
+];
+---
+
+<BaseLayout
+  title={title}
+  description={tagline}
+  type="article"
+  jsonLd={jsonLd}
+>
+  <article class="case">
+    <header class="case__hero">
+      <div class="stage-container">
+        <nav class="case__breadcrumb" aria-label="Migas de pan">
+          <a href="/">Inicio</a>
+          <span aria-hidden="true">/</span>
+          <a href="/#proyectos">Proyectos</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">{title}</span>
+        </nav>
+
+        <Stage accent={accent}>
+          <div class="case__intro">
+            <div class="case__text">
+              <p class="case__meta">
+                <span class="case__status">{STATUS_LABEL[status]}</span>
+                <span>{year}</span>
+                <span>{role}</span>
+              </p>
+
+              <h1 class="case__title" transition:name={`titulo-${project.id}`}>{title}</h1>
+              <p class="case__tagline">{tagline}</p>
+
+              <ul class="case__tags" aria-label="Ámbito del proyecto">
+                {tags.map((tag) => <li>{tag}</li>)}
+              </ul>
+
+              {
+                (links.demo || links.repo) && (
+                  <div class="case__actions">
+                    {links.demo && (
+                      <Button href={links.demo} iconEnd="lucide:external-link">
+                        Ver en producción
+                      </Button>
+                    )}
+                    {links.repo && (
+                      <Button href={links.repo} variant="secondary" iconEnd="simple-icons:github">
+                        Ver el código
+                      </Button>
+                    )}
+                  </div>
+                )
+              }
+            </div>
+
+            <div class="case__poster" transition:name={`poster-${project.id}`}>
+              <ProjectPoster title={title} accent={accent} year={year} seed={index} />
+            </div>
+          </div>
+        </Stage>
+      </div>
+    </header>
+
+    <div class="stage-container case__body">
+      <div class="case__main">
+        <section class="scene" aria-labelledby="sinopsis-titulo">
+          <p class="scene__act">Sinopsis</p>
+          <h2 id="sinopsis-titulo" class="scene__title">De qué va</h2>
+          <p class="scene__lead">{story.overview}</p>
+        </section>
+
+        {
+          scenes.map((scene) => (
+            <section class="scene" aria-labelledby={`${scene.key}-titulo`} data-reveal="rise">
+              <p class="scene__act">{scene.act}</p>
+              <h2 id={`${scene.key}-titulo`} class="scene__title">
+                {scene.title}
+              </h2>
+              <p class="scene__text">{scene.body}</p>
+            </section>
+          ))
+        }
+      </div>
+
+      <aside class="case__aside" aria-label="Ficha técnica">
+        {
+          metrics.length > 0 && (
+            <Card variant="sunken" padding="md" data-reveal="left">
+              <h2 class="aside__title">En cifras</h2>
+              <dl class="aside__metrics">
+                {metrics.map((metric) => (
+                  <div>
+                    <dt>{metric.label}</dt>
+                    <dd>{metric.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </Card>
+          )
+        }
+
+        <Card variant="sunken" padding="md" data-reveal="left" style="--reveal-delay:100ms">
+          <h2 class="aside__title">Herramientas</h2>
+          <div class="aside__stack">
+            {stack.map((tech) => <TechBadge tech={tech} size="sm" />)}
+          </div>
+        </Card>
+      </aside>
+    </div>
+
+    {
+      neighbours && (
+        <nav class="case__nav" aria-label="Otros proyectos">
+          <div class="stage-container case__nav-inner">
+            <a class="case__nav-link case__nav-link--prev" href={`/proyectos/${neighbours.prev.id}`}>
+              <span class="case__nav-label">
+                <Icon name="lucide:arrow-left" aria-hidden="true" />
+                Obra anterior
+              </span>
+              <span class="case__nav-title">{neighbours.prev.data.title}</span>
+            </a>
+            <a class="case__nav-link case__nav-link--next" href={`/proyectos/${neighbours.next.id}`}>
+              <span class="case__nav-label">
+                Obra siguiente
+                <Icon name="lucide:arrow-right" aria-hidden="true" />
+              </span>
+              <span class="case__nav-title">{neighbours.next.data.title}</span>
+            </a>
+          </div>
+        </nav>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<style>
+  .case__hero {
+    padding-block: clamp(1.5rem, 4vw, 2.5rem) clamp(2rem, 5vw, 3.5rem);
+  }
+
+  .case__breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+    font-size: var(--text-xs);
+    color: var(--text-subtle);
+  }
+
+  .case__breadcrumb a {
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+
+  .case__breadcrumb a:hover {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+
+  .case__intro {
+    display: grid;
+    gap: clamp(2rem, 5vw, 3rem);
+    align-items: center;
+  }
+
+  .case__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 0 0 1rem;
+    font-size: var(--text-2xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+  }
+
+  .case__status {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .case__title {
+    margin: 0;
+    font-size: var(--text-4xl);
+  }
+
+  .case__tagline {
+    margin: 1rem 0 0;
+    max-width: 48ch;
+    font-size: var(--text-lg);
+    color: var(--text-muted);
+  }
+
+  .case__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 1.25rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .case__tags li {
+    padding: 0.25rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: var(--text-2xs);
+    color: var(--text-muted);
+  }
+
+  .case__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+  }
+
+  /* ------------------------------------------------------- cuerpo */
+  .case__body {
+    display: grid;
+    gap: clamp(2rem, 5vw, 3.5rem);
+    align-items: start;
+    padding-bottom: clamp(3rem, 7vw, 5rem);
+  }
+
+  .scene {
+    max-width: 68ch;
+    padding-bottom: clamp(2rem, 4vw, 3rem);
+  }
+
+  .scene:last-child {
+    padding-bottom: 0;
+  }
+
+  .scene__act {
+    margin: 0 0 0.6rem;
+    font-size: var(--text-2xs);
+    font-weight: 600;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .scene__title {
+    margin: 0 0 0.85rem;
+    font-size: var(--text-2xl);
+  }
+
+  .scene__lead {
+    margin: 0;
+    font-size: var(--text-lg);
+    color: var(--text);
+  }
+
+  .scene__text {
+    margin: 0;
+    color: var(--text-muted);
+  }
+
+  /* ------------------------------------------------------- ficha */
+  .case__aside {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .aside__title {
+    margin: 0 0 0.9rem;
+    font-family: var(--font-sans);
+    font-size: var(--text-2xs);
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+  }
+
+  .aside__metrics {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+  }
+
+  .aside__metrics dt {
+    font-size: var(--text-2xs);
+    color: var(--text-subtle);
+  }
+
+  .aside__metrics dd {
+    margin: 0.15rem 0 0;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    color: var(--accent);
+  }
+
+  .aside__stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  /* ------------------------------------------------------- navegacion */
+  .case__nav {
+    border-top: 1px solid var(--border);
+    background: color-mix(in oklab, var(--surface-sunken) 55%, transparent);
+    padding-block: clamp(1.75rem, 4vw, 2.5rem);
+  }
+
+  .case__nav-inner {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .case__nav-link {
+    display: grid;
+    gap: 0.35rem;
+    padding: 1rem 1.15rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    text-decoration: none;
+    transition:
+      border-color var(--dur-fast) var(--ease-soft),
+      transform var(--dur-fast) var(--ease-scene);
+  }
+
+  .case__nav-link:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .case__nav-link--next {
+    text-align: right;
+  }
+
+  .case__nav-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: var(--text-2xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+  }
+
+  .case__nav-link--next .case__nav-label {
+    justify-content: flex-end;
+  }
+
+  .case__nav-label :global(svg) {
+    width: 0.9rem;
+    height: 0.9rem;
+  }
+
+  .case__nav-title {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    color: var(--text);
+  }
+
+  @media (min-width: 56rem) {
+    .case__intro {
+      grid-template-columns: 1.15fr 1fr;
+    }
+
+    .case__body {
+      grid-template-columns: minmax(0, 1fr) 18rem;
+    }
+
+    .case__nav-inner {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .case__nav-link:hover {
+      transform: none;
+    }
+  }
+</style>

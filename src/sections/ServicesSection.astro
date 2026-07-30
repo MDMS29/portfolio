@@ -1,0 +1,61 @@
+---
+/**
+ * ACTO V — la compania.
+ * Una reticula de tarjetas; toda la logica de presentacion vive en ServiceCard.
+ */
+import Section from '@components/ui/Section.astro';
+import ServiceCard from '@components/cards/ServiceCard.astro';
+import Button from '@components/ui/Button.astro';
+import { getServices } from '@utils/collections';
+
+const services = await getServices();
+---
+
+<Section
+  id="servicios"
+  lead="Formas de trabajar juntos. Todas terminan igual: algo que funciona, medido, documentado y que tu equipo puede mantener sin mí."
+>
+  <ul class="services" data-reveal-stagger="80">
+    {
+      services.map((service) => (
+        <li class="services__cell">
+          <ServiceCard service={service} />
+        </li>
+      ))
+    }
+  </ul>
+
+  <p class="services__cta" data-reveal="fade">
+    ¿Tu caso no encaja en ninguna de estas casillas?
+    <Button href="#contacto" variant="link" iconEnd="lucide:arrow-right">Cuéntamelo igualmente</Button>
+  </p>
+</Section>
+
+<style>
+  .services {
+    display: grid;
+    gap: 1.15rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+  }
+
+  .services__cell {
+    display: flex;
+  }
+
+  .services__cell > :global(*) {
+    width: 100%;
+  }
+
+  .services__cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: clamp(2rem, 4vw, 3rem) 0 0;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+</style>

@@ -1,0 +1,208 @@
+---
+/**
+ * ACTO I — el protagonista.
+ *
+ * Toda la prosa viene de `@data/about`. Este archivo solo decide como se
+ * compone: dos columnas en escritorio, una en movil, y los principios como
+ * tarjetas escalonadas.
+ */
+import { Icon } from 'astro-icon/components';
+import Section from '@components/ui/Section.astro';
+import Card from '@components/ui/Card.astro';
+import { ABOUT } from '@data/about';
+import { SITE } from '@data/site';
+---
+
+<Section id="sobre-mi" lead={ABOUT.opening}>
+  <div class="about">
+    <div class="about__prose" data-reveal-stagger="90">
+      {ABOUT.paragraphs.map((paragraph) => <p data-reveal="rise">{paragraph}</p>)}
+
+      <p class="about__now" data-reveal="rise">
+        <Icon name="lucide:radio" aria-hidden="true" />
+        <span>{ABOUT.currently}</span>
+      </p>
+    </div>
+
+    <aside class="about__aside" aria-label="Datos rapidos">
+      <Card variant="sunken" padding="lg" data-reveal="left">
+        <dl class="about__facts">
+          {
+            ABOUT.facts.map((fact) => (
+              <div class="about__fact">
+                <dt>{fact.label}</dt>
+                <dd>{fact.value}</dd>
+              </div>
+            ))
+          }
+        </dl>
+
+        <p class="about__signature">
+          <span class="about__signature-name">{SITE.author.name}</span>
+          <span class="about__signature-role">{SITE.author.role}</span>
+        </p>
+      </Card>
+    </aside>
+  </div>
+
+  <div class="principles" data-reveal-stagger="100">
+    <h3 class="principles__title" data-reveal="fade">Cómo trabajo</h3>
+    <ul class="principles__grid">
+      {
+        ABOUT.principles.map((principle) => (
+          <li>
+            <Card interactive padding="md" class="principle" data-reveal="rise">
+              <span class="principle__icon" aria-hidden="true">
+                <Icon name={principle.icon} />
+              </span>
+              <h4 class="principle__title">{principle.title}</h4>
+              <p class="principle__text">{principle.description}</p>
+            </Card>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</Section>
+
+<style>
+  .about {
+    display: grid;
+    gap: clamp(2rem, 5vw, 3.5rem);
+    align-items: start;
+  }
+
+  .about__prose p {
+    margin: 0 0 1.15rem;
+    color: var(--text-muted);
+    max-width: 68ch;
+  }
+
+  .about__prose p:last-child {
+    margin-bottom: 0;
+  }
+
+  .about__now {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.9rem 1.1rem;
+    border-left: 2px solid var(--accent);
+    background: var(--accent-soft);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    color: var(--text) !important;
+    font-size: var(--text-sm);
+  }
+
+  .about__now :global(svg) {
+    width: 1.05rem;
+    height: 1.05rem;
+    margin-top: 0.2em;
+    flex: none;
+    color: var(--accent);
+  }
+
+  /* ------------------------------------------------------- ficha */
+  .about__facts {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+  }
+
+  .about__fact dt {
+    font-size: var(--text-2xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+  }
+
+  .about__fact dd {
+    margin: 0.2rem 0 0;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .about__signature {
+    display: flex;
+    flex-direction: column;
+    margin: 1.75rem 0 0;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .about__signature-name {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    color: var(--accent);
+  }
+
+  .about__signature-role {
+    font-size: var(--text-2xs);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+  }
+
+  /* ------------------------------------------------------- principios */
+  .principles {
+    margin-top: clamp(3rem, 6vw, 4.5rem);
+  }
+
+  .principles__title {
+    margin: 0 0 1.5rem;
+    font-family: var(--font-sans);
+    font-size: var(--text-2xs);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+  }
+
+  .principles__grid {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  }
+
+  .principle {
+    height: 100%;
+  }
+
+  .principle__icon {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    margin-bottom: 0.9rem;
+    border-radius: var(--radius-sm);
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .principle__icon :global(svg) {
+    width: 1.15rem;
+    height: 1.15rem;
+  }
+
+  .principle__title {
+    margin: 0;
+    font-size: var(--text-base);
+    font-family: var(--font-sans);
+    font-weight: 600;
+  }
+
+  .principle__text {
+    margin: 0.45rem 0 0;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+
+  @media (min-width: 56rem) {
+    .about {
+      grid-template-columns: 1.6fr 1fr;
+    }
+  }
+</style>

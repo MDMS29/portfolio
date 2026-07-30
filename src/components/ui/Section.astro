@@ -1,0 +1,87 @@
+---
+/**
+ * SECCION — el molde de un acto.
+ *
+ * Es el componente que hace que las nueve secciones se parezcan sin
+ * copiarse: ritmo vertical, contenedor, cabecera y semantica salen de aqui.
+ * Un `*Section.astro` solo aporta su contenido.
+ *
+ * Semantica: `<section>` con `aria-labelledby` apuntando a su propio <h2>.
+ * Asi el arbol de accesibilidad expone nueve regiones navegables con nombre,
+ * en vez de un unico bloque de texto continuo.
+ */
+import { ACTS } from '@data/navigation';
+import { cn } from '@utils/cn';
+import SceneTitle from './SceneTitle.astro';
+
+interface Props {
+  /** Coincide con el id declarado en `ACTS`: es el ancla y la clave del spy. */
+  id: string;
+  /** Sobrescriben lo declarado en `ACTS` cuando hace falta. */
+  act?: string;
+  title?: string;
+  lead?: string;
+  align?: 'left' | 'center';
+  /** `sunken` alterna el fondo para separar actos consecutivos. */
+  tone?: 'plain' | 'sunken';
+  /** Desactivalo para contenido a sangre completa. */
+  container?: boolean;
+  class?: string;
+}
+
+const {
+  id,
+  act,
+  title,
+  lead,
+  align = 'left',
+  tone = 'plain',
+  container = true,
+  class: className,
+} = Astro.props;
+
+// La navegacion es la fuente de verdad del titulo del acto; las props solo
+// existen para casos excepcionales (por ejemplo, reutilizar la seccion fuera
+// de la portada).
+const declared = ACTS.find((entry) => entry.id === id);
+const actLabel = act ?? declared?.act;
+const heading = title ?? declared?.title;
+const headingId = `${id}-titulo`;
+---
+
+<section
+  id={id}
+  class={cn('act', `act--${tone}`, className)}
+  aria-labelledby={heading ? headingId : undefined}
+>
+  <div class={container ? 'stage-container' : undefined}>
+    {
+      heading && (
+        <SceneTitle headingId={headingId} act={actLabel} title={heading} lead={lead} align={align}>
+          <slot name="scene-extra" />
+        </SceneTitle>
+      )
+    }
+    <slot />
+  </div>
+</section>
+
+<style>
+  .act {
+    position: relative;
+    padding-block: var(--act-py);
+  }
+
+  /*
+    Nota deliberada: aqui NO se usa `content-visibility: auto`.
+    Ahorraria algo de layout inicial, pero introduce alturas estimadas en
+    secciones que son el destino de los anclajes del menu. Un salto de scroll
+    al pulsar "Proyectos" es un fallo visible para el usuario; el ahorro, no.
+    En una portada de HTML estatico, el coste de layout ya es despreciable.
+  */
+
+  .act--sunken {
+    background: color-mix(in oklab, var(--surface-sunken) 55%, transparent);
+    border-block: 1px solid var(--border);
+  }
+</style>

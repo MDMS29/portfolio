@@ -1,0 +1,79 @@
+---
+/**
+ * ACTO IV — las obras.
+ *
+ * Las destacadas abren el acto a doble ancho y el resto forma la reticula.
+ * La distincion sale del dato (`featured`), no de la posicion en el array:
+ * reordenar el JSON no rompe la maqueta.
+ */
+import Section from '@components/ui/Section.astro';
+import ProjectCard from '@components/cards/ProjectCard.astro';
+import { getProjects, getTechMap, resolveTech } from '@utils/collections';
+
+const [projects, techMap] = await Promise.all([getProjects(), getTechMap()]);
+
+const featured = projects.filter((project) => project.data.featured);
+const rest = projects.filter((project) => !project.data.featured);
+---
+
+<Section
+  id="proyectos"
+  tone="sunken"
+  lead="Una selección de lo que he construido. Cada obra tiene su propio programa de mano con el problema, la decisión técnica y el resultado."
+>
+  {
+    featured.length > 0 && (
+      <div class="projects__featured">
+        {featured.map((project, index) => (
+          <ProjectCard
+            project={project}
+            stack={resolveTech(techMap, project.data.stack)}
+            featured
+            index={index}
+          />
+        ))}
+      </div>
+    )
+  }
+
+  {
+    rest.length > 0 && (
+      <ul class="projects__grid" data-reveal-stagger="90">
+        {rest.map((project, index) => (
+          <li class="projects__cell">
+            <ProjectCard
+              project={project}
+              stack={resolveTech(techMap, project.data.stack)}
+              index={featured.length + index}
+            />
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</Section>
+
+<style>
+  .projects__featured {
+    display: grid;
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .projects__grid {
+    display: grid;
+    gap: 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+  }
+
+  .projects__cell {
+    display: flex;
+  }
+
+  .projects__cell > :global(*) {
+    width: 100%;
+  }
+</style>

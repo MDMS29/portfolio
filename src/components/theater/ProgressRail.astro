@@ -1,0 +1,30 @@
+---
+/**
+ * BARRA DE PROGRESO — cuanto queda de funcion.
+ *
+ * Se anima con `scaleX` desde `motion`, apoyandose en ScrollTimeline nativo
+ * donde existe: el navegador la mueve en el compositor, sin tocar el hilo
+ * principal ni disparar layout.
+ *
+ * Es informativa, no interactiva, asi que se anuncia como `progressbar`
+ * pero se marca `aria-hidden`: duplicar la posicion de scroll en el lector
+ * de pantalla es ruido, el usuario ya la conoce.
+ */
+import { theater } from '@data/theater.config';
+---
+
+{theater.progressRail && <div class="rail" data-progress-rail aria-hidden="true"></div>}
+
+<style>
+  .rail {
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline: 0;
+    z-index: calc(var(--z-nav) + 1);
+    height: 2px;
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    background: linear-gradient(90deg, var(--accent-strong), var(--accent), var(--curtain));
+    pointer-events: none;
+  }
+</style>

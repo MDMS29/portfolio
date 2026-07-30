@@ -1,0 +1,124 @@
+---
+/**
+ * CARTEL DEL PROYECTO.
+ *
+ * Genera la imagen de cada obra con CSS a partir de sus propios datos, en
+ * lugar de cargar un archivo. Es una decision de rendimiento consciente:
+ *
+ *   · 0 bytes de imagen y 0 peticiones -> nada que retrasar el LCP.
+ *   · Sin CLS: el `aspect-ratio` reserva el hueco desde el primer pintado.
+ *   · Se adapta al tema y al color de cada proyecto automaticamente.
+ *
+ * Si algun dia hay fotografias reales, este componente se sustituye por
+ * `<Image>` de `astro:assets` sin tocar `ProjectCard`.
+ */
+import { cn } from '@utils/cn';
+
+interface Props {
+  title: string;
+  accent: string;
+  year: number;
+  /** Cambia la inclinacion de los haces para que no haya dos carteles iguales. */
+  seed?: number;
+  class?: string;
+}
+
+const { title, accent, year, seed = 0, class: className } = Astro.props;
+
+const initials = title
+  .split(/\s+/)
+  .slice(0, 2)
+  .map((word) => word[0]?.toUpperCase() ?? '')
+  .join('');
+
+// Variacion determinista: misma entrada, mismo cartel en cada build.
+const tilt = ((seed * 37) % 24) - 12;
+---
+
+<div
+  class={cn('poster', className)}
+  style={`--poster-accent:${accent};--poster-tilt:${tilt}deg`}
+  aria-hidden="true"
+>
+  <div class="poster__rays"></div>
+  <div class="poster__glow"></div>
+  <span class="poster__initials">{initials}</span>
+  <span class="poster__year">{year}</span>
+</div>
+
+<style>
+  .poster {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    background:
+      radial-gradient(120% 80% at 50% 0%, color-mix(in oklab, var(--poster-accent) 55%, transparent), transparent 70%),
+      linear-gradient(160deg, var(--surface-sunken), var(--surface));
+    border: 1px solid var(--border);
+  }
+
+  /* Haces de reflector proyectados desde el borde superior. */
+  .poster__rays {
+    position: absolute;
+    inset: -20% -30%;
+    background: repeating-linear-gradient(
+      var(--poster-tilt),
+      transparent 0 26px,
+      color-mix(in oklab, var(--poster-accent) 16%, transparent) 26px 28px
+    );
+    opacity: 0.5;
+    transition: transform var(--dur-scene) var(--ease-scene);
+  }
+
+  .poster__glow {
+    position: absolute;
+    inset-inline: 15%;
+    bottom: -30%;
+    height: 60%;
+    background: radial-gradient(
+      50% 100% at 50% 100%,
+      color-mix(in oklab, var(--poster-accent) 60%, transparent),
+      transparent 70%
+    );
+  }
+
+  .poster__initials {
+    position: relative;
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 7vw, 4rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    mix-blend-mode: overlay;
+    opacity: 0.9;
+  }
+
+  .poster__year {
+    position: absolute;
+    right: 0.85rem;
+    bottom: 0.7rem;
+    font-size: var(--text-2xs);
+    letter-spacing: 0.22em;
+    color: var(--text-subtle);
+  }
+
+  /* Los haces giran despacio cuando la tarjeta que lo contiene recibe foco
+     o el cursor. El selector vive aqui, junto al efecto que describe. */
+  :global(.card--interactive:hover) .poster__rays,
+  :global(.card--interactive:focus-within) .poster__rays {
+    transform: translate3d(0, -6%, 0) scale(1.08);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .poster__rays {
+      transition: none;
+    }
+    :global(.card--interactive:hover) .poster__rays,
+    :global(.card--interactive:focus-within) .poster__rays {
+      transform: none;
+    }
+  }
+</style>

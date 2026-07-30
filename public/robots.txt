@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Ajusta el dominio junto con `site` en astro.config.mjs
+Sitemap: https://tu-dominio.com/sitemap-index.xml

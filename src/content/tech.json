@@ -1,0 +1,171 @@
+[
+  {
+    "id": "typescript",
+    "name": "TypeScript",
+    "icon": "simple-icons:typescript",
+    "category": "frontend",
+    "level": "nucleo",
+    "since": 2019,
+    "note": "El contrato que sostiene todo lo demás. Modo estricto siempre.",
+    "url": "https://www.typescriptlang.org"
+  },
+  {
+    "id": "astro",
+    "name": "Astro",
+    "icon": "simple-icons:astro",
+    "category": "frontend",
+    "level": "nucleo",
+    "since": 2022,
+    "note": "Cero JavaScript por defecto. Islas solo donde hacen falta.",
+    "url": "https://astro.build"
+  },
+  {
+    "id": "react",
+    "name": "React",
+    "icon": "simple-icons:react",
+    "category": "frontend",
+    "level": "nucleo",
+    "since": 2018,
+    "note": "Composición, estado derivado y el mínimo de efectos posible.",
+    "url": "https://react.dev"
+  },
+  {
+    "id": "nextjs",
+    "name": "Next.js",
+    "icon": "simple-icons:nextdotjs",
+    "category": "frontend",
+    "level": "solido",
+    "since": 2020,
+    "note": "App Router, RSC y streaming para paneles con mucho dato.",
+    "url": "https://nextjs.org"
+  },
+  {
+    "id": "tailwindcss",
+    "name": "Tailwind CSS",
+    "icon": "simple-icons:tailwindcss",
+    "category": "frontend",
+    "level": "nucleo",
+    "since": 2020,
+    "note": "Design tokens en CSS y utilidades encima. Sin hojas huérfanas.",
+    "url": "https://tailwindcss.com"
+  },
+  {
+    "id": "nodejs",
+    "name": "Node.js",
+    "icon": "simple-icons:nodedotjs",
+    "category": "backend",
+    "level": "nucleo",
+    "since": 2018,
+    "note": "APIs, tareas en segundo plano y herramientas internas.",
+    "url": "https://nodejs.org"
+  },
+  {
+    "id": "fastify",
+    "name": "Fastify",
+    "icon": "simple-icons:fastify",
+    "category": "backend",
+    "level": "solido",
+    "since": 2021,
+    "note": "Esquemas JSON como fuente de verdad de la validación y los tipos."
+  },
+  {
+    "id": "graphql",
+    "name": "GraphQL",
+    "icon": "simple-icons:graphql",
+    "category": "backend",
+    "level": "en-uso",
+    "since": 2021,
+    "note": "Útil cuando el cliente manda; peligroso sin límites de coste."
+  },
+  {
+    "id": "postgresql",
+    "name": "PostgreSQL",
+    "icon": "simple-icons:postgresql",
+    "category": "datos",
+    "level": "nucleo",
+    "since": 2019,
+    "note": "Índices, planes de consulta y transacciones antes que caché.",
+    "url": "https://www.postgresql.org"
+  },
+  {
+    "id": "prisma",
+    "name": "Prisma",
+    "icon": "simple-icons:prisma",
+    "category": "datos",
+    "level": "solido",
+    "since": 2021,
+    "note": "Migraciones versionadas y acceso a datos con tipos reales."
+  },
+  {
+    "id": "redis",
+    "name": "Redis",
+    "icon": "simple-icons:redis",
+    "category": "datos",
+    "level": "en-uso",
+    "since": 2022,
+    "note": "Caché con invalidación explícita y colas ligeras."
+  },
+  {
+    "id": "docker",
+    "name": "Docker",
+    "icon": "simple-icons:docker",
+    "category": "infra",
+    "level": "solido",
+    "since": 2020,
+    "note": "Builds multi-etapa y paridad real entre local y producción."
+  },
+  {
+    "id": "aws",
+    "name": "AWS",
+    "icon": "simple-icons:amazonwebservices",
+    "category": "infra",
+    "level": "en-uso",
+    "since": 2021,
+    "note": "S3, CloudFront, Lambda y lo justo de IAM para dormir tranquilo."
+  },
+  {
+    "id": "github-actions",
+    "name": "GitHub Actions",
+    "icon": "simple-icons:githubactions",
+    "category": "infra",
+    "level": "solido",
+    "since": 2020,
+    "note": "CI que bloquea el merge: tipos, tests, tamaño de bundle y a11y."
+  },
+  {
+    "id": "vitest",
+    "name": "Vitest",
+    "icon": "simple-icons:vitest",
+    "category": "calidad",
+    "level": "solido",
+    "since": 2022,
+    "note": "Tests unitarios rápidos, ejecutados en watch mientras escribo."
+  },
+  {
+    "id": "playwright",
+    "name": "Playwright",
+    "icon": "simple-icons:playwright",
+    "category": "calidad",
+    "level": "solido",
+    "since": 2022,
+    "note": "E2E en tres navegadores y capturas para revisar regresiones."
+  },
+  {
+    "id": "figma",
+    "name": "Figma",
+    "icon": "simple-icons:figma",
+    "category": "diseno",
+    "level": "en-uso",
+    "since": 2019,
+    "note": "Donde acordamos los tokens antes de escribir una línea de CSS."
+  },
+  {
+    "id": "storybook",
+    "name": "Storybook",
+    "icon": "simple-icons:storybook",
+    "category": "diseno",
+    "level": "en-uso",
+    "since": 2021,
+    "note": "El catálogo vivo del sistema de diseño y su documentación."
+  }
+]
