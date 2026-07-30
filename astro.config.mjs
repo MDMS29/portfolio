@@ -9,7 +9,8 @@ import tailwindcss from '@tailwindcss/vite';
  * el sitemap y `import.meta.env.SITE` (consumido por `src/data/site.ts`).
  */
 export default defineConfig({
-  site: 'https://tu-dominio.com',
+  site: 'https://mdms29.github.io',
+  base: '/portfolio/',
   trailingSlash: 'never',
 
   // Prefetch en viewport: la navegacion a /proyectos/[slug] es instantanea
